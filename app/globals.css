@@ -3,54 +3,50 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Legion.cc inspired dark theme */
+/* Legion.cc Brand System */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --card: #111111;
-  --card-foreground: #ffffff;
-  --popover: #111111;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #0a0a0a;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a1a;
-  --muted-foreground: #888888;
-  --accent: #c8ff00;
-  --accent-foreground: #0a0a0a;
-  --destructive: #ff4444;
-  --destructive-foreground: #ffffff;
-  --border: #222222;
-  --input: #1a1a1a;
-  --ring: #c8ff00;
-  --radius: 0.75rem;
-  --legion-green: #c8ff00;
-  --legion-dark: #0a0a0a;
-  --legion-card: #111111;
-  --legion-border: #222222;
+  --background: #09090B;
+  --foreground: #FAFAFA;
+  --card: #111113;
+  --card-foreground: #FAFAFA;
+  --popover: #111113;
+  --popover-foreground: #FAFAFA;
+  --primary: #FAFAFA;
+  --primary-foreground: #09090B;
+  --secondary: #1C1C1F;
+  --secondary-foreground: #FAFAFA;
+  --muted: #1C1C1F;
+  --muted-foreground: #71717A;
+  --accent: #C8FF00;
+  --accent-foreground: #09090B;
+  --destructive: #EF4444;
+  --destructive-foreground: #FAFAFA;
+  --border: #1F1F23;
+  --input: #1C1C1F;
+  --ring: #C8FF00;
+  --radius: 0.25rem;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --card: #111111;
-  --card-foreground: #ffffff;
-  --popover: #111111;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #0a0a0a;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a1a;
-  --muted-foreground: #888888;
-  --accent: #c8ff00;
-  --accent-foreground: #0a0a0a;
-  --destructive: #ff4444;
-  --destructive-foreground: #ffffff;
-  --border: #222222;
-  --input: #1a1a1a;
-  --ring: #c8ff00;
+  --background: #09090B;
+  --foreground: #FAFAFA;
+  --card: #111113;
+  --card-foreground: #FAFAFA;
+  --popover: #111113;
+  --popover-foreground: #FAFAFA;
+  --primary: #FAFAFA;
+  --primary-foreground: #09090B;
+  --secondary: #1C1C1F;
+  --secondary-foreground: #FAFAFA;
+  --muted: #1C1C1F;
+  --muted-foreground: #71717A;
+  --accent: #C8FF00;
+  --accent-foreground: #09090B;
+  --destructive: #EF4444;
+  --destructive-foreground: #FAFAFA;
+  --border: #1F1F23;
+  --input: #1C1C1F;
+  --ring: #C8FF00;
 }
 
 @theme inline {
