@@ -1,15 +1,11 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { LegionMark } from "@/components/legion-logo"
-
-// ─── Data ────────────────────────────────────────────────────────────────────
 
 interface Result {
   willSurvive: boolean
   username: string
   headline: string
-  verdict: string
   traits: string[]
 }
 
@@ -42,8 +38,6 @@ const SURVIVE_TRAITS = [
   "Cycle Veteran",
   "Based Builder",
   "Stack Maximalist",
-  "On-chain Native",
-  "Long-term Thinker",
 ]
 
 const NO_SURVIVE_TRAITS = [
@@ -53,17 +47,11 @@ const NO_SURVIVE_TRAITS = [
   "Panic Seller",
   "CT Brain Rot",
   "Moon Chaser",
-  "Exit Liquidity",
-  "Permabull",
 ]
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function hashUsername(s: string): number {
   return s.toLowerCase().split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
 }
-
-// ─── Canvas PNG Generation ────────────────────────────────────────────────────
 
 async function generateShareImage(result: Result): Promise<string> {
   const W = 1200
@@ -74,171 +62,76 @@ async function generateShareImage(result: Result): Promise<string> {
   const ctx = canvas.getContext("2d")!
 
   const ACCENT = "#F03C24"
-  const BG = "#101010"
-  const CARD = "#101010"
-  const BORDER = "#1F1F23"
+  const BG = "#000000"
   const WHITE = "#FAFAFA"
-  const GREY = "#BBBBBB"
-  const accent = result.willSurvive ? ACCENT : "#EF4444"
+  const GREY = "#999999"
 
-  // ── Background ──
+  // Background
   ctx.fillStyle = BG
   ctx.fillRect(0, 0, W, H)
 
-  // ── Subtle grid ──
-  ctx.strokeStyle = "#1A1A1D"
-  ctx.lineWidth = 1
-  const gridSize = 60
-  for (let x = 0; x <= W; x += gridSize) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke()
-  }
-  for (let y = 0; y <= H; y += gridSize) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
-  }
+  // Center box
+  const boxX = 150
+  const boxY = 100
+  const boxW = W - 300
+  const boxH = H - 200
+  
+  // Box border
+  ctx.strokeStyle = GREY
+  ctx.lineWidth = 2
+  ctx.strokeRect(boxX, boxY, boxW, boxH)
 
-  // ── Center card ──
-  const cardX = 60, cardY = 60, cardW = W - 120, cardH = H - 120
-  ctx.fillStyle = CARD
-  ctx.fillRect(cardX, cardY, cardW, cardH)
-  ctx.strokeStyle = BORDER
-  ctx.lineWidth = 1
-  ctx.strokeRect(cardX, cardY, cardW, cardH)
-
-  // ── Accent top bar ──
-  ctx.fillStyle = accent
-  ctx.fillRect(cardX, cardY, cardW, 4)
-
-  // ── Corner crosses ──
-  function drawCross(cx: number, cy: number, r: number) {
-    ctx.strokeStyle = BORDER
-    ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke()
-    ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke()
-  }
-  drawCross(cardX, cardY, 10)
-  drawCross(cardX + cardW, cardY, 10)
-  drawCross(cardX, cardY + cardH, 10)
-  drawCross(cardX + cardW, cardY + cardH, 10)
-
-  // ── Legion mark (sword) — drawn manually ──
-  function drawSword(x: number, y: number, scale: number) {
-    ctx.save()
-    ctx.translate(x, y)
-    ctx.scale(scale, scale)
-
-    // blade
-    ctx.fillStyle = WHITE
-    roundRect(ctx, -1.5, -18, 3, 24, 1); ctx.fill()
-    // crossguard
-    roundRect(ctx, -10, 1, 20, 3, 1); ctx.fill()
-    // handle
-    ctx.fillStyle = LIME
-    roundRect(ctx, -1.5, 7, 3, 9, 1); ctx.fill()
-    // pommel
-    roundRect(ctx, -4, 15, 8, 3, 1.5); ctx.fill()
-    // blade tip
-    ctx.fillStyle = LIME
-    ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(2.5, -12); ctx.lineTo(-2.5, -12); ctx.closePath(); ctx.fill()
-
-    ctx.restore()
-  }
-
-  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-    ctx.beginPath()
-    ctx.moveTo(x + r, y)
-    ctx.lineTo(x + w - r, y)
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r)
-    ctx.lineTo(x + w, y + h - r)
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
-    ctx.lineTo(x + r, y + h)
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r)
-    ctx.lineTo(x, y + r)
-    ctx.quadraticCurveTo(x, y, x + r, y)
-    ctx.closePath()
-  }
-
-  drawSword(cardX + 36, cardY + 50, 1.6)
-
-  // LEGION wordmark
-  ctx.font = "900 20px Inter, system-ui, sans-serif"
+  // Title
+  ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.letterSpacing = "0.2em"
-  ctx.fillText("LEGION", cardX + 58, cardY + 46)
-  ctx.letterSpacing = "0"
+  ctx.textAlign = "center"
+  ctx.fillText("Will you survive the bear market?", W / 2, boxY + 50)
 
-  // legion.cc
-  ctx.font = "500 13px Inter, system-ui, sans-serif"
-  ctx.fillStyle = GREY
-  ctx.fillText("legion.cc", cardX + 58, cardY + 62)
-
-  // ── Title label ──
-  ctx.font = "700 12px Inter, system-ui, sans-serif"
-  ctx.fillStyle = GREY
-  ctx.fillText("WILL YOU SURVIVE THE BEAR MARKET?", W / 2, cardY + 58)
-  const titleMeasure = ctx.measureText("WILL YOU SURVIVE THE BEAR MARKET?")
-  ctx.fillText("WILL YOU SURVIVE THE BEAR MARKET?", W / 2 - titleMeasure.width / 2, cardY + 58)
-
-  // ── Big verdict ──
-  ctx.font = "900 160px Inter, system-ui, sans-serif"
-  ctx.fillStyle = accent
+  // Big verdict
+  ctx.font = "bold 120px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.fillStyle = ACCENT
   const verdictText = result.willSurvive ? "YES" : "NO"
-  const verdictW = ctx.measureText(verdictText).width
-  ctx.fillText(verdictText, W / 2 - verdictW / 2, 360)
+  ctx.fillText(verdictText, W / 2, boxY + 220)
 
-  // ── Username ──
-  ctx.font = "500 22px Inter, system-ui, sans-serif"
+  // Username
+  ctx.font = "16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
-  const userText = `@${result.username}`
-  const userW = ctx.measureText(userText).width
-  ctx.fillText(userText, W / 2 - userW / 2, 410)
+  ctx.fillText(`@${result.username}`, W / 2, boxY + 270)
 
-  // ── Divider ──
-  ctx.strokeStyle = BORDER
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(W / 2 - 180, 432)
-  ctx.lineTo(W / 2 + 180, 432)
-  ctx.stroke()
-
-  // ── Headline text (word-wrapped) ──
-  ctx.font = "400 18px Inter, system-ui, sans-serif"
-  ctx.fillStyle = GREY
-  const maxW = 680
-  const lineH = 28
+  // Headline
+  ctx.font = "16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.fillStyle = WHITE
+  ctx.textAlign = "center"
+  const maxW = boxW - 60
   const words = result.headline.split(" ")
   let line = ""
-  let ty = 470
-  const lines: string[] = []
+  let y = boxY + 330
   for (const word of words) {
     const test = line + word + " "
     if (ctx.measureText(test).width > maxW && line) {
-      lines.push(line.trim()); line = word + " "
+      ctx.fillText(line.trim(), W / 2, y)
+      y += 28
+      line = word + " "
     } else {
       line = test
     }
   }
-  if (line.trim()) lines.push(line.trim())
-  for (const l of lines) {
-    const lw = ctx.measureText(l).width
-    ctx.fillText(l, W / 2 - lw / 2, ty)
-    ty += lineH
-  }
+  if (line.trim()) ctx.fillText(line.trim(), W / 2, y)
 
-  // ── Traits ──
-  ctx.font = "600 12px Inter, system-ui, sans-serif"
-  ctx.fillStyle = accent
-  const traitsStr = result.traits.join("  ·  ")
-  const traitW = ctx.measureText(traitsStr).width
-  ctx.fillText(traitsStr, W / 2 - traitW / 2, cardY + cardH - 36)
+  // Traits
+  ctx.font = "14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.fillStyle = ACCENT
+  const traitsStr = result.traits.join(" • ")
+  ctx.fillText(traitsStr, W / 2, boxY + boxH - 30)
 
-  // ── Bottom line ──
-  ctx.fillStyle = accent
-  ctx.fillRect(cardX, cardY + cardH - 4, cardW, 4)
+  // Legion logo at bottom
+  ctx.font = "12px monospace"
+  ctx.fillStyle = GREY
+  ctx.textAlign = "center"
+  ctx.fillText("legion.cc", W / 2, H - 20)
 
   return canvas.toDataURL("image/png")
 }
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 export function BearMarketChecker() {
   const [username, setUsername] = useState("")
@@ -252,18 +145,16 @@ export function BearMarketChecker() {
     setIsLoading(true)
     setResult(null)
 
-    await new Promise((r) => setTimeout(r, 1400))
+    await new Promise((r) => setTimeout(r, 1200))
 
     const h = hashUsername(raw)
     const willSurvive = h % 3 !== 0
-
     const headlines = willSurvive ? SURVIVE_HEADLINES : NO_SURVIVE_HEADLINES
     const pool = willSurvive ? SURVIVE_TRAITS : NO_SURVIVE_TRAITS
     const headline = headlines[h % headlines.length]
     const traits = [pool[h % pool.length], pool[(h + 2) % pool.length], pool[(h + 4) % pool.length]]
-    const verdict = willSurvive ? "Survivor" : "Eliminated"
 
-    setResult({ willSurvive, username: raw, headline, verdict, traits })
+    setResult({ willSurvive, username: raw, headline, traits })
     setIsLoading(false)
   }, [username])
 
@@ -271,7 +162,7 @@ export function BearMarketChecker() {
     if (!result) return
     const dataUrl = await generateShareImage(result)
     const a = document.createElement("a")
-    a.download = `legion-bear-market-${result.username}.png`
+    a.download = `bear-market-${result.username}.png`
     a.href = dataUrl
     a.click()
   }, [result])
@@ -282,163 +173,64 @@ export function BearMarketChecker() {
     setTimeout(() => inputRef.current?.focus(), 50)
   }
 
-  const accent = result?.willSurvive ? "#C8FF00" : "#EF4444"
+  const accentColor = result?.willSurvive ? "#F03C24" : "#EF4444"
+
+  if (result) {
+    return (
+      <div className="w-full space-y-6 text-center">
+        {/* Result Preview Box */}
+        <div className="border-2 border-gray-600 rounded-2xl p-12 bg-black min-h-72 flex flex-col items-center justify-center space-y-6">
+          <p className="text-gray-400 text-sm">Your result</p>
+          <h2 className="text-6xl font-bold" style={{ color: accentColor }}>
+            {result.willSurvive ? "YES" : "NO"}
+          </h2>
+          <p className="text-gray-300 text-lg max-w-md">{result.headline}</p>
+          <p className="text-gray-500 text-sm">{result.traits.join(" • ")}</p>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-3 pt-4">
+          <button
+            onClick={handleDownload}
+            className="w-full px-6 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 transition-colors"
+          >
+            Download Result
+          </button>
+          <button
+            onClick={reset}
+            className="w-full px-6 py-3 bg-transparent border-2 border-gray-600 text-white rounded-full font-semibold hover:border-gray-400 transition-colors"
+          >
+            Try Another
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      {!result ? (
-        // ── Input State ──
-        <div className="space-y-3">
-          <div className="relative flex items-center">
-            <span className="absolute left-4 text-[#71717A] font-mono text-base select-none pointer-events-none">
-              @
-            </span>
-            <input
-              ref={inputRef}
-              type="text"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="your_username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/^@/, ""))}
-              onKeyDown={(e) => e.key === "Enter" && !isLoading && generateResult()}
-              disabled={isLoading}
-              className="w-full h-13 pl-9 pr-4 py-3.5 bg-[#111113] border border-[#1F1F23] text-[#FAFAFA] placeholder:text-[#3F3F46] font-mono text-base focus:outline-none focus:border-[#C8FF00] focus:ring-0 transition-colors disabled:opacity-50"
-              style={{ borderRadius: "2px" }}
-            />
-          </div>
+    <div className="w-full space-y-4">
+      {/* Input Box */}
+      <div className="border-2 border-gray-600 rounded-2xl p-4 bg-black">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Enter your X username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && generateResult()}
+          className="w-full bg-transparent text-white placeholder-gray-500 outline-none text-center text-lg"
+          autoFocus
+        />
+      </div>
 
-          <button
-            onClick={generateResult}
-            disabled={!username.trim() || isLoading}
-            className="w-full h-13 py-3.5 font-bold text-sm tracking-[0.12em] uppercase transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              background: isLoading || !username.trim() ? "#1C1C1F" : "#C8FF00",
-              color: isLoading || !username.trim() ? "#3F3F46" : "#09090B",
-              borderRadius: "2px",
-            }}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-3">
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                Analyzing your fate...
-              </span>
-            ) : (
-              "Check Your Survival"
-            )}
-          </button>
-
-          <p className="text-center text-[#3F3F46] text-xs tracking-widest uppercase pt-1">
-            Enter your X handle to find out
-          </p>
-        </div>
-      ) : (
-        // ── Result State ──
-        <div className="space-y-4">
-          {/* Card */}
-          <div
-            className="relative overflow-hidden"
-            style={{
-              background: "#111113",
-              border: `1px solid ${accent}`,
-              borderRadius: "2px",
-            }}
-          >
-            {/* Top accent bar */}
-            <div className="h-[3px] w-full" style={{ background: accent }} />
-
-            {/* Corner marks */}
-            <div className="absolute top-3 left-3 w-3 h-3 border-t border-l" style={{ borderColor: accent }} />
-            <div className="absolute top-3 right-3 w-3 h-3 border-t border-r" style={{ borderColor: accent }} />
-            <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l" style={{ borderColor: accent }} />
-            <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r" style={{ borderColor: accent }} />
-
-            <div className="px-8 py-10 text-center space-y-5">
-              {/* Username */}
-              <p className="text-[#71717A] font-mono text-sm tracking-widest uppercase">
-                @{result.username}
-              </p>
-
-              {/* Big YES / NO */}
-              <div
-                className="text-[100px] md:text-[120px] font-black leading-none tracking-tight"
-                style={{ color: accent }}
-              >
-                {result.willSurvive ? "YES" : "NO"}
-              </div>
-
-              {/* Verdict label */}
-              <div
-                className="inline-block px-3 py-1 text-xs font-bold tracking-[0.18em] uppercase"
-                style={{
-                  border: `1px solid ${accent}`,
-                  color: accent,
-                  borderRadius: "2px",
-                }}
-              >
-                {result.verdict}
-              </div>
-
-              {/* Divider */}
-              <div className="w-16 h-px mx-auto" style={{ background: "#1F1F23" }} />
-
-              {/* Headline */}
-              <p className="text-[#71717A] text-sm leading-relaxed max-w-xs mx-auto">
-                {result.headline}
-              </p>
-
-              {/* Traits */}
-              <div className="flex flex-wrap justify-center gap-2">
-                {result.traits.map((trait) => (
-                  <span
-                    key={trait}
-                    className="text-xs font-semibold tracking-widest uppercase"
-                    style={{ color: accent }}
-                  >
-                    {trait}
-                  </span>
-                ))}
-              </div>
-
-              {/* Legion watermark */}
-              <div className="flex items-center justify-center gap-2 pt-2 opacity-40">
-                <LegionMark size={14} className="text-[#FAFAFA]" />
-                <span className="text-xs font-bold tracking-[0.18em] uppercase text-[#FAFAFA]">
-                  legion.cc
-                </span>
-              </div>
-            </div>
-
-            {/* Bottom accent bar */}
-            <div className="h-[3px] w-full" style={{ background: accent }} />
-          </div>
-
-          {/* Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={handleDownload}
-              className="h-11 font-bold text-xs tracking-[0.12em] uppercase transition-colors"
-              style={{
-                background: accent,
-                color: "#09090B",
-                borderRadius: "2px",
-              }}
-            >
-              Download PNG
-            </button>
-            <button
-              onClick={reset}
-              className="h-11 font-bold text-xs tracking-[0.12em] uppercase border border-[#1F1F23] text-[#71717A] hover:border-[#3F3F46] hover:text-[#FAFAFA] transition-colors"
-              style={{ borderRadius: "2px", background: "transparent" }}
-            >
-              Try Another
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Button */}
+      <button
+        onClick={generateResult}
+        disabled={!username.trim() || isLoading}
+        className="w-full px-6 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {isLoading ? "Checking..." : "Check Your Fate"}
+      </button>
     </div>
   )
 }
