@@ -264,13 +264,13 @@ export function BearMarketChecker() {
         <div className="flex flex-col gap-3">
           <button
             onClick={handleDownload}
-            className="w-full px-6 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 transition-colors"
+            className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
           >
             Download result
           </button>
           <button
             onClick={reset}
-            className="w-full px-6 py-3 bg-transparent border border-gray-700 text-white rounded-full font-semibold hover:border-gray-500 transition-colors"
+            className="w-full px-6 py-3 bg-transparent border border-gray-700 text-white rounded-full font-bold hover:border-gray-500 transition-colors"
           >
             Try another
           </button>
@@ -299,7 +299,7 @@ export function BearMarketChecker() {
       <button
         onClick={generateResult}
         disabled={!username.trim() || isLoading}
-        className="w-full px-6 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         {isLoading ? "Calculating..." : "Check your survival rate"}
       </button>
