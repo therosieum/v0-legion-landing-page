@@ -12,53 +12,53 @@ interface Result {
 
 // Score tiers
 function getTier(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "Survivor", color: "#F03C24" }
-  if (score >= 60) return { label: "Likely survivor", color: "#F03C24" }
-  if (score >= 40) return { label: "On the edge", color: "#BBBBBB" }
-  if (score >= 20) return { label: "At risk", color: "#BBBBBB" }
-  return { label: "Won't make it", color: "#555555" }
+  if (score >= 80) return { label: "You're locked in", color: "#F03C24" }
+  if (score >= 60) return { label: "Lowkey gonna make it", color: "#F03C24" }
+  if (score >= 40) return { label: "It's giving 50/50", color: "#BBBBBB" }
+  if (score >= 20) return { label: "Not looking good", color: "#BBBBBB" }
+  return { label: "Absolutely cooked", color: "#555555" }
 }
 
 const HEADLINES: Record<string, string[]> = {
   high: [
-    "Diamond hands forged in 2022. You've seen −90% and smiled.",
-    "You DCA'd through Luna, FTX, and Three Arrows. Unbreakable.",
-    "Stacking while others panic-sold. This is the way.",
-    "Your conviction is your shield. Bear markets are just discounts.",
-    "HODL isn't a strategy for you — it's a personality trait.",
+    "You're actually locked in. The bear can't touch this.",
+    "POV: you bought the dip and the dip respected you back.",
+    "Main character energy but make it financial literacy.",
+    "No thoughts, just stacking. Respect.",
+    "Your portfolio is giving... stability? In this economy?",
   ],
   mid_high: [
-    "Shaky at times, but your fundamentals hold up.",
-    "You'll feel the pressure, but you won't fold completely.",
-    "Survivable. Some scars, but you'll come out the other side.",
-    "Not unbreakable, but resilient enough to weather the storm.",
+    "Lowkey gonna make it. Just don't check your portfolio at 3am.",
+    "You're cooked but like, medium rare. Still edible.",
+    "Giving survivor but with a few therapy sessions needed.",
+    "You'll make it out, just maybe with a few trust issues.",
   ],
   mid: [
-    "It's going to be a rough ride. 50/50 on whether you make it.",
-    "The market will test every ounce of your conviction.",
-    "You're walking a tightrope. One bad week could end you.",
-    "Borderline. Your habits will determine your fate.",
+    "It's giving 50/50. Flip a coin bestie.",
+    "The math isn't mathing but it's not NOT mathing either.",
+    "You're on thin ice but at least you're skating.",
+    "Real talk? Could go either way. Stay hydrated.",
   ],
   low: [
-    "Paper hands detected. The bear market will humble you.",
-    "Too many moon calls, not enough fundamentals.",
-    "You're the exit liquidity the whales dreamed about.",
-    "Leverage degen energy. The liquidation cascade is coming.",
+    "Not you being the exit liquidity. Embarrassing for you.",
+    "Tell me you bought the top without telling me you bought the top.",
+    "Your portfolio said 'I'm tired' and honestly same.",
+    "This is giving... financial ruin? Get help.",
   ],
   very_low: [
-    "NGMI. The bear market is your final boss and you're under-leveled.",
-    "Your portfolio reads like a cautionary tale.",
-    "Bought the top, will sell the bottom. Classic.",
-    "The bear market sends its regards.",
+    "Be so fr rn. Your bags aren't making it.",
+    "The bear market saw your portfolio and laughed.",
+    "No cap, this is giving charity case.",
+    "Chronically online but financially offline. Tragic.",
   ],
 }
 
 const TRAITS_BY_TIER: Record<string, string[]> = {
-  high: ["Diamond Hands", "DCA Warrior", "FUD Resistant", "Cycle Veteran", "Based Builder", "Stack Maximalist"],
-  mid_high: ["Slow Accumulator", "Somewhat Resilient", "Cautious Holder", "Selective Buyer"],
-  mid: ["Fence Sitter", "Uncertain Hands", "Wavering Conviction", "Market Dependent"],
-  low: ["Paper Hands", "Top Buyer", "CT Brain Rot", "Moon Chaser"],
-  very_low: ["Panic Seller", "Leverage Degen", "Exit Liquidity", "Permabull in a Bear"],
+  high: ["Locked In", "Unbothered", "Actually Literate", "Zero Panic", "Built Different", "Touch Grass Investor"],
+  mid_high: ["Lowkey Solid", "Slight Panic", "Mostly Chill", "Occasional Doom Check"],
+  mid: ["50/50 Energy", "Trust Issues", "Chaotic Neutral", "Vibes Only Investor"],
+  low: ["Exit Liquidity", "Chronically Online", "Top Buyer", "CT Brain Rot"],
+  very_low: ["Absolutely Cooked", "Down Bad", "No Recovery Arc", "Bag Fumbler"],
 }
 
 function hashUsername(s: string): number {

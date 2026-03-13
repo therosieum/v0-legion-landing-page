@@ -1,6 +1,6 @@
 'use client'
 
-import { LegionMark } from '@/components/legion-logo'
+import Image from 'next/image'
 import { BearMarketChecker } from '@/components/bear-market-checker'
 
 export default function Home() {
@@ -8,7 +8,13 @@ export default function Home() {
     <main className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12 relative">
       {/* Legion Logo - Top Left */}
       <div className="absolute top-8 left-8">
-        <LegionMark size={40} className="text-white" />
+        <Image 
+          src="/legion-logo.svg" 
+          alt="Legion" 
+          width={120} 
+          height={32} 
+          className="h-8 w-auto"
+        />
       </div>
 
       <div className="w-full max-w-2xl space-y-8">
