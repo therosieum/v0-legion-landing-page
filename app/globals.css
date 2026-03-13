@@ -3,50 +3,55 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Legion.cc Brand System */
+/* Legion Academy Brand System - From Figma */
 :root {
-  --background: #09090B;
+  --background: #101010;
   --foreground: #FAFAFA;
-  --card: #111113;
+  --card: #101010;
   --card-foreground: #FAFAFA;
-  --popover: #111113;
+  --popover: #101010;
   --popover-foreground: #FAFAFA;
   --primary: #FAFAFA;
-  --primary-foreground: #09090B;
+  --primary-foreground: #101010;
   --secondary: #1C1C1F;
   --secondary-foreground: #FAFAFA;
   --muted: #1C1C1F;
-  --muted-foreground: #71717A;
-  --accent: #C8FF00;
-  --accent-foreground: #09090B;
+  --muted-foreground: #BBBBBB;
+  --accent: #F03C24;
+  --accent-foreground: #FAFAFA;
   --destructive: #EF4444;
   --destructive-foreground: #FAFAFA;
   --border: #1F1F23;
   --input: #1C1C1F;
-  --ring: #C8FF00;
+  --ring: #F03C24;
   --radius: 0.25rem;
+  /* Legion Academy Figma colors */
+  --legion-accent: #F03C24;
+  --legion-black: #101010;
+  --legion-grey: #BBBBBB;
+  --legion-maroon: #280D0E;
 }
 
 .dark {
-  --background: #09090B;
+  --background: #101010;
   --foreground: #FAFAFA;
-  --card: #111113;
+  --card: #101010;
   --card-foreground: #FAFAFA;
-  --popover: #111113;
+  --popover: #101010;
   --popover-foreground: #FAFAFA;
   --primary: #FAFAFA;
-  --primary-foreground: #09090B;
+  --primary-foreground: #101010;
   --secondary: #1C1C1F;
   --secondary-foreground: #FAFAFA;
   --muted: #1C1C1F;
-  --muted-foreground: #71717A;
-  --accent: #C8FF00;
-  --accent-foreground: #09090B;
+  --muted-foreground: #BBBBBB;
+  --accent: #F03C24;
+  --accent-foreground: #FAFAFA;
   --destructive: #EF4444;
   --destructive-foreground: #FAFAFA;
   --border: #1F1F23;
   --input: #1C1C1F;
-  --ring: #C8FF00;
+  --ring: #F03C24;
 }
 
 @theme inline {

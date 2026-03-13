@@ -3,7 +3,7 @@ import { BearMarketChecker } from "@/components/bear-market-checker"
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-[#09090B] overflow-hidden">
+    <main className="relative min-h-screen bg-[#101010] overflow-hidden">
 
       {/* ── Grid background ── */}
       <div
@@ -76,8 +76,8 @@ export default function Home() {
             <div className="space-y-4">
               {/* Eyebrow label */}
               <div className="flex items-center gap-3">
-                <div className="w-5 h-px bg-[#C8FF00]" />
-                <span className="text-[#C8FF00] text-xs font-bold tracking-[0.22em] uppercase">
+                <div className="w-5 h-px bg-[#F03C24]" />
+                <span className="text-[#F03C24] text-xs font-bold tracking-[0.22em] uppercase">
                   The Ultimate Test
                 </span>
               </div>
@@ -90,13 +90,13 @@ export default function Home() {
                 <span className="block text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#FAFAFA] leading-[1.0] uppercase">
                   survive the
                 </span>
-                <span className="block text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#C8FF00] leading-[1.0] uppercase">
+                <span className="block text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#F03C24] leading-[1.0] uppercase">
                   bear market?
                 </span>
               </h1>
 
               {/* Subtext */}
-              <p className="text-[#71717A] text-base leading-relaxed max-w-sm pt-1">
+              <p className="text-[#BBBBBB] text-base leading-relaxed max-w-sm pt-1">
                 Enter your X username. Find out if you have what it takes.
               </p>
             </div>

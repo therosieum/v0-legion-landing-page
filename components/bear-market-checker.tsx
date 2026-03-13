@@ -73,14 +73,13 @@ async function generateShareImage(result: Result): Promise<string> {
   canvas.height = H
   const ctx = canvas.getContext("2d")!
 
-  const LIME = "#C8FF00"
-  const RED = "#EF4444"
-  const BG = "#09090B"
-  const CARD = "#111113"
+  const ACCENT = "#F03C24"
+  const BG = "#101010"
+  const CARD = "#101010"
   const BORDER = "#1F1F23"
   const WHITE = "#FAFAFA"
-  const GREY = "#71717A"
-  const accent = result.willSurvive ? LIME : RED
+  const GREY = "#BBBBBB"
+  const accent = result.willSurvive ? ACCENT : "#EF4444"
 
   // ── Background ──
   ctx.fillStyle = BG
