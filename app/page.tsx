@@ -5,7 +5,15 @@ import { BearMarketChecker } from '@/components/bear-market-checker'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12 relative">
+    <main 
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative"
+      style={{
+        backgroundImage: 'url(/bg-pattern.svg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* Legion Logo - Top Left */}
       <div className="absolute top-8 left-8">
         <Image 
