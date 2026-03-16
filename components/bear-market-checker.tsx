@@ -261,7 +261,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 export function BearMarketChecker() {
-  const [step, setStep] = useState<"quiz" | "result">("quiz")
+  const [step, setStep] = useState<"start" | "quiz" | "result">("start")
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
   const [selected, setSelected] = useState<number | null>(null)
@@ -306,7 +306,7 @@ export function BearMarketChecker() {
   }, [selected, answers, current, isTransitioning])
 
   const reset = () => {
-    setStep("quiz")
+    setStep("start")
     setCurrent(0)
     setAnswers([])
     setSelected(null)
@@ -322,6 +322,20 @@ export function BearMarketChecker() {
     a.href = dataUrl
     a.click()
   }, [result])
+
+  // ── Start screen ──
+  if (step === "start") {
+    return (
+      <div className="w-full">
+        <button
+          onClick={() => setStep("quiz")}
+          className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
+        >
+          Take the quiz
+        </button>
+      </div>
+    )
+  }
 
   // ── Result screen ──
   if (step === "result" && result) {
