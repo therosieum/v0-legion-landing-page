@@ -1,95 +1,161 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useCallback } from "react"
+import Image from "next/image"
 
-interface Result {
-  score: number
-  username: string
-  headline: string
-  traits: string[]
-  label: string
+// ─── Quiz data ────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+  {
+    id: 1,
+    question: "You wake up. First thing you do?",
+    options: [
+      { label: "Check price", score: 1 },
+      { label: "Open X", score: 2 },
+      { label: "I didn't sleep", score: 0 },
+      { label: "Kiss my partner and check price", score: 3 },
+    ],
+  },
+  {
+    id: 2,
+    question: "X now requires you to label any project post as a paid partnership. You...",
+    options: [
+      { label: "Label everything — not dying on this hill", score: 3 },
+      { label: "Post anyway and pretend I didn't see the new TOS", score: 1 },
+      { label: "I stopped posting about projects, easier", score: 2 },
+      { label: "I was never getting paid anyway so nothing changed", score: 0 },
+    ],
+  },
+  {
+    id: 3,
+    question: "Your dev just said he's leaving crypto for AI. You...",
+    options: [
+      { label: "Respect it", score: 3 },
+      { label: "Ask if he needs a cofounder", score: 2 },
+      { label: "He's going to regret this in 18 months and I will say nothing", score: 2 },
+      { label: "I'm also leaving", score: 0 },
+    ],
+  },
+  {
+    id: 4,
+    question: "You open CT. Everyone is posting the same thing again. You...",
+    options: [
+      { label: "Post it too", score: 0 },
+      { label: "Close the app and reopen it immediately", score: 1 },
+      { label: "I wrote the original", score: 3 },
+      { label: "I've accepted this is just what it is now", score: 2 },
+    ],
+  },
+  {
+    id: 5,
+    question: "Your FYP is 90% content you don't care about. You...",
+    options: [
+      { label: "Keep scrolling anyway", score: 1 },
+      { label: "I curated my following list for 3 years and it still looks like TikTok", score: 2 },
+      { label: "WE ARE COOKED", score: 0 },
+      { label: "I haven't looked up in a while", score: 1 },
+    ],
+  },
+  {
+    id: 6,
+    question: "A founder just rugged. You go on Ethos and...",
+    options: [
+      { label: "Slash immediately, max credibility burned", score: 3 },
+      { label: "I check if anyone else already slashed first", score: 1 },
+      { label: "I vouch. I don't understand my own behavior.", score: 0 },
+      { label: "I close the tab. Not my problem anymore.", score: 2 },
+    ],
+  },
+  {
+    id: 7,
+    question: "A suit just got hired for a role that used to go to a degen. You feel...",
+    options: [
+      { label: "It's fine, the industry is maturing", score: 3 },
+      { label: "I am the degen who didn't get the role", score: 1 },
+      { label: "I am the suit", score: 2 },
+      { label: "I've started updating my LinkedIn", score: 0 },
+    ],
+  },
+  {
+    id: 8,
+    question: "Why are you still in crypto?",
+    options: [
+      { label: "I genuinely believe in it", score: 3 },
+      { label: "I've already told too many people I'm in crypto", score: 1 },
+      { label: "We are still early", score: 2 },
+      { label: "I love all my CT friends", score: 2 },
+    ],
+  },
+]
+
+const MAX_SCORE = QUESTIONS.reduce((acc, q) => acc + Math.max(...q.options.map((o) => o.score)), 0)
+
+// ─── Result copy ───────────────────────────────────────────────────────────────
+
+type Tier = "survivor" | "likely" | "edge" | "risk" | "cooked"
+
+function getTier(pct: number): Tier {
+  if (pct >= 82) return "survivor"
+  if (pct >= 62) return "likely"
+  if (pct >= 42) return "edge"
+  if (pct >= 22) return "risk"
+  return "cooked"
 }
 
-// Score tiers
-function getTier(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "You're locked in", color: "#F03C24" }
-  if (score >= 60) return { label: "Lowkey gonna make it", color: "#F03C24" }
-  if (score >= 40) return { label: "It's giving 50/50", color: "#BBBBBB" }
-  if (score >= 20) return { label: "Not looking good", color: "#BBBBBB" }
-  return { label: "Absolutely cooked", color: "#555555" }
+const TIER_LABEL: Record<Tier, string> = {
+  survivor: "You're built for this",
+  likely: "Lowkey gonna make it",
+  edge: "Too close to call",
+  risk: "Not looking great",
+  cooked: "Absolutely cooked",
 }
 
-const HEADLINES: Record<string, string[]> = {
-  high: [
-    "You're actually locked in. The bear can't touch this.",
-    "POV: you bought the dip and the dip respected you back.",
-    "Main character energy but make it financial literacy.",
-    "No thoughts, just stacking. Respect.",
-    "Your portfolio is giving... stability? In this economy?",
+// Quotes keyed by (tier, answer combo fingerprint) — we pick by raw score mod length
+const TIER_QUOTES: Record<Tier, string[]> = {
+  survivor: [
+    "You're not just surviving — you're the person others are watching to decide if they should panic.",
+    "You've seen the cycle enough times that the bear market is basically just a sale you prepared for.",
+    "Honestly? You might be the only person in CT who will look back at this period without regret.",
+    "You're treating the bear market like a gym membership — showing up while everyone else cancels.",
   ],
-  mid_high: [
-    "Lowkey gonna make it. Just don't check your portfolio at 3am.",
-    "You're cooked but like, medium rare. Still edible.",
-    "Giving survivor but with a few therapy sessions needed.",
-    "You'll make it out, just maybe with a few trust issues.",
+  likely: [
+    "You'll make it, but you're going to have a few very dark Sunday evenings first.",
+    "Solid fundamentals, questionable sleep schedule. You're probably fine.",
+    "The bear market isn't going to break you. Your group chat might, but not the market.",
+    "You have the right instincts. You just need to stop checking prices at 2am.",
   ],
-  mid: [
-    "It's giving 50/50. Flip a coin bestie.",
-    "The math isn't mathing but it's not NOT mathing either.",
-    "You're on thin ice but at least you're skating.",
-    "Real talk? Could go either way. Stay hydrated.",
+  edge: [
+    "The outcome is genuinely unclear and that's kind of the honest answer here.",
+    "You're going to be okay, but only if you stop making decisions based on the CT mood.",
+    "50/50. The next three months are basically a personality test you haven't studied for.",
+    "You could go either way. The question is which version of you shows up when it matters.",
   ],
-  low: [
-    "Not you being the exit liquidity. Embarrassing for you.",
-    "Tell me you bought the top without telling me you bought the top.",
-    "Your portfolio said 'I'm tired' and honestly same.",
-    "This is giving... financial ruin? Get help.",
+  risk: [
+    "You're still in it for the right reasons, but your habits are actively working against you.",
+    "The bear market isn't your real problem. Your real problem is your relationship with this app.",
+    "You have enough self-awareness to know you're not okay. That's actually step one.",
+    "Honestly, a 30-day CT detox might be worth more than any trade you'll make this quarter.",
   ],
-  very_low: [
-    "Be so fr rn. Your bags aren't making it.",
-    "The bear market saw your portfolio and laughed.",
-    "No cap, this is giving charity case.",
-    "Chronically online but financially offline. Tragic.",
+  cooked: [
+    "This isn't a roast, it's a wellness check. Please close the app and eat something.",
+    "You're not going to make it through the bear market, but you might make it through the day. Focus on that.",
+    "The bear market didn't do this to you. You were already like this before it got here.",
+    "At some point optimism becomes a coping mechanism. You've crossed that line. Respect, honestly.",
   ],
 }
 
-const TRAITS_BY_TIER: Record<string, string[]> = {
-  high: ["Locked In", "Unbothered", "Actually Literate", "Zero Panic", "Built Different", "Touch Grass Investor"],
-  mid_high: ["Lowkey Solid", "Slight Panic", "Mostly Chill", "Occasional Doom Check"],
-  mid: ["50/50 Energy", "Trust Issues", "Chaotic Neutral", "Vibes Only Investor"],
-  low: ["Exit Liquidity", "Chronically Online", "Top Buyer", "CT Brain Rot"],
-  very_low: ["Absolutely Cooked", "Down Bad", "No Recovery Arc", "Bag Fumbler"],
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+interface QuizResult {
+  pct: number
+  tier: Tier
+  quote: string
+  answers: number[]
 }
 
-function hashUsername(s: string): number {
-  let h = 5381
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 33) ^ s.charCodeAt(i)
-  }
-  return Math.abs(h)
-}
+// ─── Canvas PNG export ─────────────────────────────────────────────────────────
 
-function computeScore(raw: string): number {
-  const h = hashUsername(raw)
-  // Multiple signals derived from username characteristics
-  const lengthScore = Math.min(raw.length / 20, 1) * 20        // longer = more experienced
-  const numericPenalty = (raw.replace(/\D/g, "").length / raw.length) * 15  // lots of numbers = degen
-  const variedChars = new Set(raw.toLowerCase()).size
-  const diversityScore = Math.min(variedChars / 10, 1) * 20    // varied chars = diverse thinking
-  const hashScore = (h % 100) * 0.6                             // pseudo-random base 0–60
-  const raw_score = lengthScore + diversityScore + hashScore - numericPenalty
-  return Math.min(99, Math.max(1, Math.round(raw_score)))
-}
-
-function getHeadlineKey(score: number): keyof typeof HEADLINES {
-  if (score >= 80) return "high"
-  if (score >= 60) return "mid_high"
-  if (score >= 40) return "mid"
-  if (score >= 20) return "low"
-  return "very_low"
-}
-
-async function generateShareImage(result: Result): Promise<string> {
+async function generateShareImage(result: QuizResult): Promise<string> {
   const W = 1200
   const H = 675
   const canvas = document.createElement("canvas")
@@ -101,163 +167,207 @@ async function generateShareImage(result: Result): Promise<string> {
   const BG = "#000000"
   const WHITE = "#FAFAFA"
   const GREY = "#888888"
-  const DARK_GREY = "#333333"
+  const DARK = "#1a1a1a"
 
   // Background
   ctx.fillStyle = BG
   ctx.fillRect(0, 0, W, H)
 
-  // Center content card
-  const boxX = 120
-  const boxY = 80
-  const boxW = W - 240
-  const boxH = H - 160
+  // Subtle grid lines
+  ctx.strokeStyle = "#111111"
+  ctx.lineWidth = 1
+  for (let x = 0; x < W; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke()
+  }
+  for (let y = 0; y < H; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
+  }
 
-  ctx.strokeStyle = DARK_GREY
-  ctx.lineWidth = 1.5
-  ctx.strokeRect(boxX, boxY, boxW, boxH)
+  // Card
+  const cx = 80, cy = 60, cw = W - 160, ch = H - 120
+  ctx.fillStyle = "#050505"
+  ctx.beginPath()
+  ctx.roundRect(cx, cy, cw, ch, 12)
+  ctx.fill()
+  ctx.strokeStyle = "#222222"
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.roundRect(cx, cy, cw, ch, 12)
+  ctx.stroke()
+
+  // Accent top bar
+  ctx.fillStyle = ACCENT
+  ctx.beginPath()
+  ctx.roundRect(cx, cy, cw, 3, [3, 3, 0, 0])
+  ctx.fill()
+
+  // Legion logo (text fallback since we can't load external SVGs easily in canvas)
+  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.fillStyle = WHITE
+  ctx.textAlign = "left"
+  ctx.fillText("LEGION", cx + 36, cy + 44)
 
   // Title
-  ctx.font = "600 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = WHITE
-  ctx.textAlign = "center"
-  ctx.fillText("Will you survive the bear market?", W / 2, boxY + 56)
-
-  // Username
-  ctx.font = "16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "500 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
-  ctx.fillText(`@${result.username}`, W / 2, boxY + 94)
+  ctx.textAlign = "center"
+  ctx.fillText("Will you survive the bear market?", W / 2, cy + 44)
 
   // Big percentage
-  ctx.font = `bold 130px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+  ctx.font = `bold 148px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
   ctx.fillStyle = ACCENT
-  ctx.fillText(`${result.score}%`, W / 2, boxY + 260)
+  ctx.textAlign = "center"
+  ctx.fillText(`${result.pct}%`, W / 2, cy + 240)
 
-  // Label
-  ctx.font = "600 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  // Tier label
+  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.fillText(result.label, W / 2, boxY + 305)
+  ctx.fillText(TIER_LABEL[result.tier], W / 2, cy + 286)
 
-  // Progress bar background
-  const barX = boxX + 80
-  const barY = boxY + 340
-  const barW = boxW - 160
-  const barH = 6
-  ctx.fillStyle = DARK_GREY
-  ctx.beginPath()
-  ctx.roundRect(barX, barY, barW, barH, 3)
-  ctx.fill()
-
-  // Progress bar fill
+  // Progress bar
+  const bx = cx + 100, by = cy + 316, bw = cw - 200, bh = 5
+  ctx.fillStyle = DARK
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 3); ctx.fill()
   ctx.fillStyle = ACCENT
-  ctx.beginPath()
-  ctx.roundRect(barX, barY, barW * (result.score / 100), barH, 3)
-  ctx.fill()
+  ctx.beginPath(); ctx.roundRect(bx, by, bw * (result.pct / 100), bh, 3); ctx.fill()
 
-  // Headline text (wrap)
+  // Quote — wrapped
   ctx.font = "16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
   ctx.textAlign = "center"
-  const maxTextW = boxW - 120
-  const words = result.headline.split(" ")
+  const maxW = cw - 160
+  const words = result.quote.split(" ")
   let line = ""
-  let y = boxY + 390
+  let qy = cy + 362
   for (const word of words) {
     const test = line + word + " "
-    if (ctx.measureText(test).width > maxTextW && line) {
-      ctx.fillText(line.trim(), W / 2, y)
-      y += 26
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line.trim(), W / 2, qy)
+      qy += 28
       line = word + " "
-    } else {
-      line = test
-    }
+    } else line = test
   }
-  if (line.trim()) ctx.fillText(line.trim(), W / 2, y)
+  if (line.trim()) ctx.fillText(line.trim(), W / 2, qy)
 
-  // Traits
+  // Bottom: legion.cc
   ctx.font = "13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = DARK_GREY
-  ctx.fillText(result.traits.join("  ·  "), W / 2, boxY + boxH - 40)
-
-  // Legion wordmark bottom
-  ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = GREY
-  ctx.fillText("LEGION", W / 2, H - 22)
+  ctx.fillStyle = "#444444"
+  ctx.textAlign = "center"
+  ctx.fillText("legion.cc", W / 2, cy + ch - 22)
 
   return canvas.toDataURL("image/png")
 }
 
+// ─── Component ─────────────────────────────────────────────────────────────────
+
 export function BearMarketChecker() {
-  const [username, setUsername] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<Result | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [step, setStep] = useState<"quiz" | "result">("quiz")
+  const [current, setCurrent] = useState(0)
+  const [answers, setAnswers] = useState<number[]>([])
+  const [selected, setSelected] = useState<number | null>(null)
+  const [result, setResult] = useState<QuizResult | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  const generateResult = useCallback(async () => {
-    const raw = username.trim().replace(/^@/, "")
-    if (!raw) return
-    setIsLoading(true)
+  const question = QUESTIONS[current]
+  const progress = ((current) / QUESTIONS.length) * 100
+
+  const handleSelect = useCallback((optionIndex: number) => {
+    if (isTransitioning) return
+    setSelected(optionIndex)
+  }, [isTransitioning])
+
+  const handleNext = useCallback(() => {
+    if (selected === null || isTransitioning) return
+    setIsTransitioning(true)
+    const newAnswers = [...answers, selected]
+
+    setTimeout(() => {
+      if (current < QUESTIONS.length - 1) {
+        setAnswers(newAnswers)
+        setCurrent((c) => c + 1)
+        setSelected(null)
+        setIsTransitioning(false)
+      } else {
+        // Calculate result
+        const totalScore = newAnswers.reduce((acc, answerIdx, qIdx) => {
+          return acc + QUESTIONS[qIdx].options[answerIdx].score
+        }, 0)
+        const pct = Math.round((totalScore / MAX_SCORE) * 100)
+        const tier = getTier(pct)
+        const quotes = TIER_QUOTES[tier]
+        // pick quote based on answer pattern
+        const fingerprint = newAnswers.reduce((a, b) => a + b, 0)
+        const quote = quotes[fingerprint % quotes.length]
+        setResult({ pct, tier, quote, answers: newAnswers })
+        setStep("result")
+        setIsTransitioning(false)
+      }
+    }, 200)
+  }, [selected, answers, current, isTransitioning])
+
+  const reset = () => {
+    setStep("quiz")
+    setCurrent(0)
+    setAnswers([])
+    setSelected(null)
     setResult(null)
-
-    await new Promise((r) => setTimeout(r, 1400))
-
-    const score = computeScore(raw)
-    const key = getHeadlineKey(score)
-    const h = hashUsername(raw)
-    const headlines = HEADLINES[key]
-    const pool = TRAITS_BY_TIER[key]
-    const headline = headlines[h % headlines.length]
-    const traits = [pool[h % pool.length], pool[(h + 1) % pool.length], pool[(h + 2) % pool.length]]
-    const { label } = getTier(score)
-
-    setResult({ score, username: raw, headline, traits, label })
-    setIsLoading(false)
-  }, [username])
+    setIsTransitioning(false)
+  }
 
   const handleDownload = useCallback(async () => {
     if (!result) return
     const dataUrl = await generateShareImage(result)
     const a = document.createElement("a")
-    a.download = `bear-market-${result.username}.png`
+    a.download = `bear-market-survival.png`
     a.href = dataUrl
     a.click()
   }, [result])
 
-  const reset = () => {
-    setResult(null)
-    setUsername("")
-    setTimeout(() => inputRef.current?.focus(), 50)
-  }
-
-  if (result) {
-    const { label, color } = getTier(result.score)
+  // ── Result screen ──
+  if (step === "result" && result) {
     return (
-      <div className="w-full space-y-6 text-center">
-        {/* Result preview box */}
-        <div className="border border-gray-800 rounded-2xl p-10 bg-black flex flex-col items-center space-y-5">
-          <p className="text-gray-500 text-sm">@{result.username}</p>
+      <div className="w-full space-y-5 text-center">
+        {/* Card */}
+        <div className="relative border border-white/10 rounded-2xl overflow-hidden bg-black">
+          {/* Accent top line */}
+          <div className="h-0.5 w-full bg-[#F03C24]" />
 
-          {/* Score */}
-          <p className="text-8xl font-bold" style={{ color: "#F03C24" }}>
-            {result.score}%
-          </p>
-
-          {/* Label */}
-          <p className="text-white text-xl font-semibold">{label}</p>
-
-          {/* Progress bar */}
-          <div className="w-full bg-gray-800 rounded-full h-1.5">
-            <div
-              className="h-1.5 rounded-full transition-all duration-700"
-              style={{ width: `${result.score}%`, backgroundColor: "#F03C24" }}
+          {/* Legion logo top-left */}
+          <div className="absolute top-4 left-5">
+            <Image
+              src="/legion-logo.svg"
+              alt="Legion"
+              width={80}
+              height={22}
+              className="h-5 w-auto brightness-0 invert opacity-60"
             />
           </div>
 
-          {/* Headline */}
-          <p className="text-gray-400 text-base max-w-md leading-relaxed">{result.headline}</p>
+          <div className="pt-14 pb-10 px-8 flex flex-col items-center space-y-4">
+            {/* Big percentage */}
+            <p className="text-8xl font-bold leading-none" style={{ color: "#F03C24" }}>
+              {result.pct}%
+            </p>
 
-          {/* Traits */}
-          <p className="text-gray-600 text-sm">{result.traits.join(" · ")}</p>
+            {/* Tier label */}
+            <p className="text-white text-xl font-semibold">{TIER_LABEL[result.tier]}</p>
+
+            {/* Progress bar */}
+            <div className="w-full bg-white/10 rounded-full h-1">
+              <div
+                className="h-1 rounded-full transition-all duration-1000"
+                style={{ width: `${result.pct}%`, backgroundColor: "#F03C24" }}
+              />
+            </div>
+
+            {/* Quote */}
+            <p className="text-gray-400 text-base max-w-md leading-relaxed pt-1">
+              {result.quote}
+            </p>
+
+            {/* legion.cc */}
+            <p className="text-white/20 text-xs pt-2">legion.cc</p>
+          </div>
         </div>
 
         {/* Buttons */}
@@ -266,42 +376,67 @@ export function BearMarketChecker() {
             onClick={handleDownload}
             className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
           >
-            Download result
+            Share on X
           </button>
           <button
             onClick={reset}
-            className="w-full px-6 py-3 bg-transparent border border-gray-700 text-white rounded-full font-bold hover:border-gray-500 transition-colors"
+            className="w-full px-6 py-3 bg-transparent border border-white/20 text-white rounded-full font-bold hover:border-white/40 transition-colors"
           >
-            Try another
+            Retake the quiz
           </button>
         </div>
       </div>
     )
   }
 
+  // ── Quiz screen ──
   return (
-    <div className="w-full space-y-4">
-      {/* Input */}
-      <div className="border border-gray-800 rounded-2xl p-4 bg-black">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Enter your X username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && generateResult()}
-          className="w-full bg-transparent text-white placeholder-gray-600 outline-none text-center text-lg"
-          autoFocus
-        />
+    <div className="w-full space-y-5">
+      {/* Progress */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-white/40">
+          <span>{current + 1} / {QUESTIONS.length}</span>
+          <span>{Math.round(progress)}%</span>
+        </div>
+        <div className="w-full bg-white/10 rounded-full h-0.5">
+          <div
+            className="h-0.5 rounded-full transition-all duration-300"
+            style={{ width: `${progress}%`, backgroundColor: "#F03C24" }}
+          />
+        </div>
       </div>
 
-      {/* CTA */}
+      {/* Question card */}
+      <div className="border border-white/10 rounded-2xl p-6 bg-black space-y-5">
+        <p className="text-white text-lg font-medium leading-snug">
+          {question.question}
+        </p>
+
+        {/* Options */}
+        <div className="space-y-2.5">
+          {question.options.map((opt, i) => (
+            <button
+              key={i}
+              onClick={() => handleSelect(i)}
+              className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all duration-150 ${
+                selected === i
+                  ? "border-[#F03C24] text-white bg-[#F03C24]/10"
+                  : "border-white/10 text-gray-400 hover:border-white/30 hover:text-white bg-transparent"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Next button */}
       <button
-        onClick={generateResult}
-        disabled={!username.trim() || isLoading}
-        className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        onClick={handleNext}
+        disabled={selected === null || isTransitioning}
+        className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? "Calculating..." : "Check your survival rate"}
+        {current === QUESTIONS.length - 1 ? "See my result" : "Next"}
       </button>
     </div>
   )
