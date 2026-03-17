@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Image from "next/image"
 
 // ─── Quiz data ────────────────────────────────────────────────────────────────
@@ -110,7 +110,6 @@ const TIER_LABEL: Record<Tier, string> = {
   cooked: "Absolutely cooked",
 }
 
-// Quotes keyed by (tier, answer combo fingerprint) — we pick by raw score mod length
 const TIER_QUOTES: Record<Tier, string[]> = {
   survivor: [
     "You're not just surviving — you're the person others are watching to decide if they should panic.",
@@ -157,103 +156,79 @@ interface QuizResult {
 
 async function generateShareImage(result: QuizResult): Promise<string> {
   const W = 1200
-  const H = 675
+  const H = 630
   const canvas = document.createElement("canvas")
   canvas.width = W
   canvas.height = H
   const ctx = canvas.getContext("2d")!
 
-  const ACCENT = "#F03C24"
-  const BG = "#000000"
-  const WHITE = "#FAFAFA"
-  const GREY = "#888888"
-  const DARK = "#1a1a1a"
+  // Load background image
+  const bgImg = new window.Image()
+  bgImg.crossOrigin = "anonymous"
+  bgImg.src = "/result-bg.png"
 
-  // Background
-  ctx.fillStyle = BG
+  await new Promise((resolve) => {
+    bgImg.onload = resolve
+    bgImg.onerror = resolve
+  })
+
+  // Draw background
+  if (bgImg.complete && bgImg.naturalWidth > 0) {
+    ctx.drawImage(bgImg, 0, 0, W, H)
+  } else {
+    ctx.fillStyle = "#000000"
+    ctx.fillRect(0, 0, W, H)
+  }
+
+  // Semi-transparent overlay for text readability
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)"
   ctx.fillRect(0, 0, W, H)
 
-  // Subtle grid lines
-  ctx.strokeStyle = "#111111"
-  ctx.lineWidth = 1
-  for (let x = 0; x < W; x += 60) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke()
-  }
-  for (let y = 0; y < H; y += 60) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
-  }
+  const ACCENT = "#F03C24"
+  const WHITE = "#FAFAFA"
+  const GREY = "#888888"
 
-  // Card
-  const cx = 80, cy = 60, cw = W - 160, ch = H - 120
-  ctx.fillStyle = "#050505"
-  ctx.beginPath()
-  ctx.roundRect(cx, cy, cw, ch, 12)
-  ctx.fill()
-  ctx.strokeStyle = "#222222"
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.roundRect(cx, cy, cw, ch, 12)
-  ctx.stroke()
-
-  // Accent top bar
-  ctx.fillStyle = ACCENT
-  ctx.beginPath()
-  ctx.roundRect(cx, cy, cw, 3, [3, 3, 0, 0])
-  ctx.fill()
-
-  // Legion logo (text fallback since we can't load external SVGs easily in canvas)
-  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  // Title at top
+  ctx.font = "500 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.textAlign = "left"
-  ctx.fillText("LEGION", cx + 36, cy + 44)
-
-  // Title
-  ctx.font = "500 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = GREY
   ctx.textAlign = "center"
-  ctx.fillText("Will you survive the bear market?", W / 2, cy + 44)
+  ctx.fillText("Will you survive the bear market?", W / 2, 80)
 
-  // Big percentage
-  ctx.font = `bold 148px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+  // Big percentage in center
+  ctx.font = `bold 180px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
   ctx.fillStyle = ACCENT
   ctx.textAlign = "center"
-  ctx.fillText(`${result.pct}%`, W / 2, cy + 240)
+  ctx.fillText(`${result.pct}%`, W / 2, 300)
 
   // Tier label
-  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "600 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.fillText(TIER_LABEL[result.tier], W / 2, cy + 286)
-
-  // Progress bar
-  const bx = cx + 100, by = cy + 316, bw = cw - 200, bh = 5
-  ctx.fillStyle = DARK
-  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 3); ctx.fill()
-  ctx.fillStyle = ACCENT
-  ctx.beginPath(); ctx.roundRect(bx, by, bw * (result.pct / 100), bh, 3); ctx.fill()
+  ctx.fillText(TIER_LABEL[result.tier], W / 2, 360)
 
   // Quote — wrapped
-  ctx.font = "16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
   ctx.textAlign = "center"
-  const maxW = cw - 160
+  const maxW = W - 200
   const words = result.quote.split(" ")
   let line = ""
-  let qy = cy + 362
+  let qy = 420
   for (const word of words) {
     const test = line + word + " "
     if (ctx.measureText(test).width > maxW && line) {
       ctx.fillText(line.trim(), W / 2, qy)
-      qy += 28
+      qy += 30
       line = word + " "
     } else line = test
   }
   if (line.trim()) ctx.fillText(line.trim(), W / 2, qy)
 
-  // Bottom: legion.cc
-  ctx.font = "13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = "#444444"
+  // LEGION text at bottom (matching the image)
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.fillStyle = WHITE
+  ctx.letterSpacing = "4px"
   ctx.textAlign = "center"
-  ctx.fillText("legion.cc", W / 2, cy + ch - 22)
+  ctx.fillText("LEGION", W / 2, H - 40)
 
   return canvas.toDataURL("image/png")
 }
@@ -267,9 +242,31 @@ export function BearMarketChecker() {
   const [selected, setSelected] = useState<number | null>(null)
   const [result, setResult] = useState<QuizResult | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [showQuestion, setShowQuestion] = useState(true)
+  const [animatedPct, setAnimatedPct] = useState(0)
 
   const question = QUESTIONS[current]
   const progress = ((current) / QUESTIONS.length) * 100
+
+  // Animate percentage on result
+  useEffect(() => {
+    if (step === "result" && result) {
+      setAnimatedPct(0)
+      const target = result.pct
+      const duration = 1500
+      const start = performance.now()
+      
+      const animate = (now: number) => {
+        const elapsed = now - start
+        const progress = Math.min(elapsed / duration, 1)
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setAnimatedPct(Math.round(eased * target))
+        if (progress < 1) requestAnimationFrame(animate)
+      }
+      requestAnimationFrame(animate)
+    }
+  }, [step, result])
 
   const handleSelect = useCallback((optionIndex: number) => {
     if (isTransitioning) return
@@ -279,6 +276,7 @@ export function BearMarketChecker() {
   const handleNext = useCallback(() => {
     if (selected === null || isTransitioning) return
     setIsTransitioning(true)
+    setShowQuestion(false)
     const newAnswers = [...answers, selected]
 
     setTimeout(() => {
@@ -286,6 +284,7 @@ export function BearMarketChecker() {
         setAnswers(newAnswers)
         setCurrent((c) => c + 1)
         setSelected(null)
+        setShowQuestion(true)
         setIsTransitioning(false)
       } else {
         // Calculate result
@@ -295,14 +294,13 @@ export function BearMarketChecker() {
         const pct = Math.round((totalScore / MAX_SCORE) * 100)
         const tier = getTier(pct)
         const quotes = TIER_QUOTES[tier]
-        // pick quote based on answer pattern
         const fingerprint = newAnswers.reduce((a, b) => a + b, 0)
         const quote = quotes[fingerprint % quotes.length]
         setResult({ pct, tier, quote, answers: newAnswers })
         setStep("result")
         setIsTransitioning(false)
       }
-    }, 200)
+    }, 300)
   }, [selected, answers, current, isTransitioning])
 
   const reset = () => {
@@ -312,13 +310,14 @@ export function BearMarketChecker() {
     setSelected(null)
     setResult(null)
     setIsTransitioning(false)
+    setShowQuestion(true)
   }
 
   const handleDownload = useCallback(async () => {
     if (!result) return
     const dataUrl = await generateShareImage(result)
     const a = document.createElement("a")
-    a.download = `bear-market-survival.png`
+    a.download = `bear-market-survival-${result.pct}.png`
     a.href = dataUrl
     a.click()
   }, [result])
@@ -326,10 +325,10 @@ export function BearMarketChecker() {
   // ── Start screen ──
   if (step === "start") {
     return (
-      <div className="w-full">
+      <div className="w-full animate-in fade-in duration-500">
         <button
           onClick={() => setStep("quiz")}
-          className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
+          className="w-full px-6 py-4 bg-white text-black rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           Take the quiz
         </button>
@@ -340,61 +339,74 @@ export function BearMarketChecker() {
   // ── Result screen ──
   if (step === "result" && result) {
     return (
-      <div className="w-full space-y-5 text-center">
-        {/* Card */}
-        <div className="relative border border-white/10 rounded-2xl overflow-hidden bg-black">
-          {/* Accent top line */}
-          <div className="h-0.5 w-full bg-[#F03C24]" />
+      <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Card with Legion background */}
+        <div 
+          className="relative rounded-2xl overflow-hidden"
+          style={{
+            backgroundImage: 'url(/result-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Content */}
+          <div className="relative pt-6 pb-8 px-8 flex flex-col items-center space-y-4">
+            {/* Legion logo top */}
+            <div className="w-full flex justify-center mb-2">
+              <Image
+                src="/legion-logo.svg"
+                alt="Legion"
+                width={100}
+                height={28}
+                className="h-6 w-auto brightness-0 invert"
+              />
+            </div>
 
-          {/* Legion logo top-left */}
-          <div className="absolute top-4 left-5">
-            <Image
-              src="/legion-logo.svg"
-              alt="Legion"
-              width={80}
-              height={22}
-              className="h-5 w-auto brightness-0 invert opacity-60"
-            />
-          </div>
+            {/* Title */}
+            <p className="text-white/60 text-sm">Will you survive the bear market?</p>
 
-          <div className="pt-14 pb-10 px-8 flex flex-col items-center space-y-4">
             {/* Big percentage */}
-            <p className="text-8xl font-bold leading-none" style={{ color: "#F03C24" }}>
-              {result.pct}%
+            <p 
+              className="text-[120px] md:text-[140px] font-bold leading-none tracking-tighter animate-in zoom-in duration-700"
+              style={{ color: "#F03C24" }}
+            >
+              {animatedPct}%
             </p>
 
             {/* Tier label */}
-            <p className="text-white text-xl font-semibold">{TIER_LABEL[result.tier]}</p>
+            <p className="text-white text-2xl font-semibold animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
+              {TIER_LABEL[result.tier]}
+            </p>
 
             {/* Progress bar */}
-            <div className="w-full bg-white/10 rounded-full h-1">
+            <div className="w-full max-w-xs bg-white/10 rounded-full h-1.5 overflow-hidden">
               <div
-                className="h-1 rounded-full transition-all duration-1000"
-                style={{ width: `${result.pct}%`, backgroundColor: "#F03C24" }}
+                className="h-full rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${animatedPct}%`, backgroundColor: "#F03C24" }}
               />
             </div>
 
             {/* Quote */}
-            <p className="text-gray-400 text-base max-w-md leading-relaxed pt-1">
+            <p className="text-gray-400 text-base max-w-md text-center leading-relaxed pt-2 animate-in fade-in duration-500 delay-500">
               {result.quote}
             </p>
-
-            {/* legion.cc */}
-            <p className="text-white/20 text-xs pt-2">legion.cc</p>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
           <button
             onClick={handleDownload}
-            className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
+            className="w-full px-6 py-4 bg-white text-black rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           >
             Share on X
           </button>
           <button
             onClick={reset}
-            className="w-full px-6 py-3 bg-transparent border border-white/20 text-white rounded-full font-bold hover:border-white/40 transition-colors"
+            className="w-full px-6 py-4 bg-transparent border border-white/20 text-white rounded-full font-bold hover:border-white/40 hover:bg-white/5 transition-all duration-200"
           >
             Retake the quiz
           </button>
@@ -407,36 +419,42 @@ export function BearMarketChecker() {
   return (
     <div className="w-full space-y-5">
       {/* Progress */}
-      <div className="space-y-2">
+      <div className="space-y-2 animate-in fade-in duration-300">
         <div className="flex justify-between text-sm text-white/40">
           <span>{current + 1} / {QUESTIONS.length}</span>
-          <span>{Math.round(progress)}%</span>
         </div>
-        <div className="w-full bg-white/10 rounded-full h-0.5">
+        <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
           <div
-            className="h-0.5 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%`, backgroundColor: "#F03C24" }}
+            className="h-full rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${((current + 1) / QUESTIONS.length) * 100}%`, backgroundColor: "#F03C24" }}
           />
         </div>
       </div>
 
       {/* Question card */}
-      <div className="border border-white/10 rounded-2xl p-6 bg-black space-y-5">
-        <p className="text-white text-lg font-medium leading-snug">
+      <div 
+        className={`border border-white/10 rounded-2xl p-6 bg-black/50 backdrop-blur-sm space-y-5 transition-all duration-300 ${
+          showQuestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}
+      >
+        <p className="text-white text-xl font-medium leading-snug">
           {question.question}
         </p>
 
         {/* Options */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {question.options.map((opt, i) => (
             <button
               key={i}
               onClick={() => handleSelect(i)}
-              className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all duration-150 ${
+              className={`w-full text-left px-5 py-4 rounded-xl border text-base transition-all duration-200 ${
                 selected === i
-                  ? "border-[#F03C24] text-white bg-[#F03C24]/10"
-                  : "border-white/10 text-gray-400 hover:border-white/30 hover:text-white bg-transparent"
+                  ? "border-[#F03C24] text-white bg-[#F03C24]/15 scale-[1.01]"
+                  : "border-white/10 text-gray-300 hover:border-white/30 hover:text-white hover:bg-white/5 bg-transparent"
               }`}
+              style={{
+                transitionDelay: `${i * 50}ms`
+              }}
             >
               {opt.label}
             </button>
@@ -448,7 +466,11 @@ export function BearMarketChecker() {
       <button
         onClick={handleNext}
         disabled={selected === null || isTransitioning}
-        className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className={`w-full px-6 py-4 rounded-full font-bold text-lg transition-all duration-300 ${
+          selected !== null
+            ? "bg-white text-black hover:bg-gray-100 hover:scale-[1.01] active:scale-[0.99]"
+            : "bg-white/20 text-white/40 cursor-not-allowed"
+        }`}
       >
         {current === QUESTIONS.length - 1 ? "See my result" : "Next"}
       </button>

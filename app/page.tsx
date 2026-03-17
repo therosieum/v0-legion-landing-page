@@ -32,7 +32,7 @@ export default function Home() {
             Will you survive the bear market?
           </h1>
           <p className="text-white/60 text-base">
-            Answer 8 questions to find out
+            8 questions to find out
           </p>
         </div>
 
