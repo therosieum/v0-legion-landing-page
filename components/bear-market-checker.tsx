@@ -103,12 +103,43 @@ function getTier(pct: number): Tier {
   return "cooked"
 }
 
-const TIER_LABEL: Record<Tier, string> = {
-  survivor: "You're built for this",
-  likely: "Lowkey gonna make it",
-  edge: "Too close to call",
-  risk: "Not looking great",
-  cooked: "Absolutely cooked",
+const TIER_LABELS: Record<Tier, string[]> = {
+  survivor: [
+    "You're built for this",
+    "Diamond hands verified",
+    "Bear market? What bear market?",
+    "Unshakeable",
+    "Built different",
+  ],
+  likely: [
+    "Lowkey gonna make it",
+    "You'll be fine",
+    "Survival odds: high",
+    "Pretty solid tbh",
+    "Main character energy",
+  ],
+  edge: [
+    "It's a coin flip",
+    "Could go either way",
+    "The vibes are uncertain",
+    "Borderline survivor",
+    "Touch and go",
+    "Living on the edge",
+  ],
+  risk: [
+    "Not looking great",
+    "Slightly cooked",
+    "Concerning, but salvageable",
+    "You need to lock in",
+    "Warning signs detected",
+  ],
+  cooked: [
+    "Absolutely cooked",
+    "Down catastrophic",
+    "RIP your portfolio",
+    "Beyond saving",
+    "Certified exit liquidity",
+  ],
 }
 
 const TIER_QUOTES: Record<Tier, string[]> = {
@@ -149,6 +180,7 @@ const TIER_QUOTES: Record<Tier, string[]> = {
 interface QuizResult {
   pct: number
   tier: Tier
+  tierLabel: string
   quote: string
   answers: number[]
 }
@@ -217,7 +249,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   ctx.fillStyle = WHITE
   ctx.textAlign = "center"
   ctx.textBaseline = "top"
-  ctx.fillText(TIER_LABEL[result.tier], W / 2, 380)
+  ctx.fillText(result.tierLabel, W / 2, 380)
 
   // Quote — wrapped with better spacing
   ctx.font = "600 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
@@ -314,10 +346,12 @@ export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: b
         const rawPct = Math.round((totalScore / MAX_SCORE) * 100) + variance
         const pct = Math.max(15, Math.min(99, rawPct))
         const tier = getTier(pct)
+        const tierLabels = TIER_LABELS[tier]
+        const tierLabel = tierLabels[Math.floor(Math.random() * tierLabels.length)]
         const quotes = TIER_QUOTES[tier]
         const fingerprint = currentAnswers.reduce((a, b) => a + b, 0)
         const quote = quotes[fingerprint % quotes.length]
-        setResult({ pct, tier, quote, answers: currentAnswers })
+        setResult({ pct, tier, tierLabel, quote, answers: currentAnswers })
         setStep("result")
         setIsTransitioning(false)
         setTimeout(() => {
@@ -427,7 +461,7 @@ export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: b
 
             {/* Tier label */}
             <p className="text-white text-2xl font-semibold animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-              {TIER_LABEL[result.tier]}
+              {result.tierLabel}
             </p>
 
             {/* Progress bar */}
