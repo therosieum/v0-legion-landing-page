@@ -20,7 +20,9 @@ export default function Home() {
         <img 
           src="/legion-logo.svg" 
           alt="Legion" 
-          className="h-8 w-auto brightness-0 invert"
+          width={120}
+          height={32}
+          className="brightness-0 invert"
         />
       </div>
 
@@ -39,7 +41,7 @@ export default function Home() {
         <BearMarketChecker />
 
         {/* Pre-quiz disclaimer */}
-        <p className="text-white/30 text-[10px] text-center leading-relaxed max-w-md mx-auto">
+        <p className="text-white/50 text-xs text-center leading-relaxed max-w-md mx-auto">
           Just a Heads Up: This quiz is purely for fun and the "vibes." While Legion takes on-chain reputation seriously, this specific quiz is for entertainment purposes only. It is not investment advice, nor is it a formal assessment of your financial standing or "Legion Score." Play at your own risk, laugh at the memes, and remember: none of this is financial advice.
         </p>
       </div>
