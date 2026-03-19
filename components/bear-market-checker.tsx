@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
 
 // ─── Quiz data ────────────────────────────────────────────────────────────────
@@ -235,7 +235,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export function BearMarketChecker() {
+export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: boolean) => void }) {
   const [step, setStep] = useState<"start" | "quiz" | "result">("start")
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
@@ -244,9 +244,9 @@ export function BearMarketChecker() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showQuestion, setShowQuestion] = useState(true)
   const [animatedPct, setAnimatedPct] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const question = QUESTIONS[current]
-  const progress = ((current) / QUESTIONS.length) * 100
 
   // Animate percentage on result
   useEffect(() => {
@@ -255,11 +255,9 @@ export function BearMarketChecker() {
       const target = result.pct
       const duration = 1500
       const start = performance.now()
-      
       const animate = (now: number) => {
         const elapsed = now - start
         const progress = Math.min(elapsed / duration, 1)
-        // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3)
         setAnimatedPct(Math.round(eased * target))
         if (progress < 1) requestAnimationFrame(animate)
@@ -268,40 +266,47 @@ export function BearMarketChecker() {
     }
   }, [step, result])
 
-  const handleSelect = useCallback((optionIndex: number) => {
-    if (isTransitioning) return
-    setSelected(optionIndex)
-  }, [isTransitioning])
-
-  const handleNext = useCallback(() => {
-    if (selected === null || isTransitioning) return
+  const advance = useCallback((optionIndex: number, currentAnswers: number[]) => {
     setIsTransitioning(true)
     setShowQuestion(false)
-    const newAnswers = [...answers, selected]
 
     setTimeout(() => {
       if (current < QUESTIONS.length - 1) {
-        setAnswers(newAnswers)
+        setAnswers(currentAnswers)
         setCurrent((c) => c + 1)
         setSelected(null)
         setShowQuestion(true)
         setIsTransitioning(false)
+        // Scroll the quiz container into view smoothly
+        setTimeout(() => {
+          containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 50)
       } else {
-        // Calculate result
-        const totalScore = newAnswers.reduce((acc, answerIdx, qIdx) => {
+        const totalScore = currentAnswers.reduce((acc, answerIdx, qIdx) => {
           return acc + QUESTIONS[qIdx].options[answerIdx].score
         }, 0)
         const pct = Math.round((totalScore / MAX_SCORE) * 100)
         const tier = getTier(pct)
         const quotes = TIER_QUOTES[tier]
-        const fingerprint = newAnswers.reduce((a, b) => a + b, 0)
+        const fingerprint = currentAnswers.reduce((a, b) => a + b, 0)
         const quote = quotes[fingerprint % quotes.length]
-        setResult({ pct, tier, quote, answers: newAnswers })
+        setResult({ pct, tier, quote, answers: currentAnswers })
         setStep("result")
         setIsTransitioning(false)
+        setTimeout(() => {
+          containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 50)
       }
-    }, 300)
-  }, [selected, answers, current, isTransitioning])
+    }, 350)
+  }, [current])
+
+  const handleSelect = useCallback((optionIndex: number) => {
+    if (isTransitioning) return
+    setSelected(optionIndex)
+    // Auto-advance after a short delay so the selection highlight is visible
+    const newAnswers = [...answers, optionIndex]
+    setTimeout(() => advance(optionIndex, newAnswers), 400)
+  }, [isTransitioning, answers, advance])
 
   const reset = () => {
     setStep("start")
@@ -325,10 +330,13 @@ export function BearMarketChecker() {
   // ── Start screen ──
   if (step === "start") {
     return (
-      <div className="w-full animate-in fade-in duration-500">
+      <div className="w-full">
         <button
-          onClick={() => setStep("quiz")}
-          className="w-full px-6 py-4 bg-white text-black rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={() => {
+            setStep("quiz")
+            onStepChange?.(true)
+          }}
+          className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
         >
           Take the quiz
         </button>
@@ -356,11 +364,10 @@ export function BearMarketChecker() {
           <div className="relative pt-6 pb-8 px-8 flex flex-col items-center space-y-4">
             {/* Legion logo top */}
             <div className="w-full flex justify-center mb-2">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/legion-logo.svg"
                 alt="Legion"
-                width={100}
-                height={28}
                 className="h-6 w-auto brightness-0 invert"
               />
             </div>
@@ -417,7 +424,7 @@ export function BearMarketChecker() {
 
   // ── Quiz screen ──
   return (
-    <div className="w-full space-y-5">
+    <div ref={containerRef} className="w-full space-y-5">
       {/* Progress */}
       <div className="space-y-2 animate-in fade-in duration-300">
         <div className="flex justify-between text-sm text-white/40">
@@ -432,9 +439,9 @@ export function BearMarketChecker() {
       </div>
 
       {/* Question card */}
-      <div 
+      <div
         className={`border border-white/10 rounded-2xl p-6 bg-black/50 backdrop-blur-sm space-y-5 transition-all duration-300 ${
-          showQuestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          showQuestion ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
         <p className="text-white text-xl font-medium leading-snug">
@@ -447,33 +454,18 @@ export function BearMarketChecker() {
             <button
               key={i}
               onClick={() => handleSelect(i)}
+              disabled={isTransitioning}
               className={`w-full text-left px-5 py-4 rounded-xl border text-base transition-all duration-200 ${
                 selected === i
                   ? "border-[#F03C24] text-white bg-[#F03C24]/15 scale-[1.01]"
                   : "border-white/10 text-gray-300 hover:border-white/30 hover:text-white hover:bg-white/5 bg-transparent"
               }`}
-              style={{
-                transitionDelay: `${i * 50}ms`
-              }}
             >
               {opt.label}
             </button>
           ))}
         </div>
       </div>
-
-      {/* Next button */}
-      <button
-        onClick={handleNext}
-        disabled={selected === null || isTransitioning}
-        className={`w-full px-6 py-4 rounded-full font-bold text-lg transition-all duration-300 ${
-          selected !== null
-            ? "bg-white text-black hover:bg-gray-100 hover:scale-[1.01] active:scale-[0.99]"
-            : "bg-white/20 text-white/40 cursor-not-allowed"
-        }`}
-      >
-        {current === QUESTIONS.length - 1 ? "See my result" : "Next"}
-      </button>
     </div>
   )
 }
