@@ -21,7 +21,8 @@ export default function Home() {
           alt="Legion" 
           width={120} 
           height={32} 
-          className="h-8 w-auto brightness-0 invert"
+          style={{ width: "auto", height: "32px" }}
+          className="brightness-0 invert"
         />
       </div>
 
