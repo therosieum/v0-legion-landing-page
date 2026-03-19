@@ -321,10 +321,36 @@ export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: b
   const handleDownload = useCallback(async () => {
     if (!result) return
     const dataUrl = await generateShareImage(result)
+    
+    // Convert data URL to blob for better mobile support
+    const response = await fetch(dataUrl)
+    const blob = await response.blob()
+    const file = new File([blob], `bear-market-survival-${result.pct}.png`, { type: 'image/png' })
+    
+    // Try Web Share API first (works great on mobile)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Will you survive the bear market?',
+          text: `I got ${result.pct}% on the Legion bear market quiz!`,
+        })
+        return
+      } catch (err) {
+        // User cancelled or share failed, fall through to download
+        if ((err as Error).name === 'AbortError') return
+      }
+    }
+    
+    // Fallback: create blob URL and download
+    const blobUrl = URL.createObjectURL(blob)
     const a = document.createElement("a")
+    a.href = blobUrl
     a.download = `bear-market-survival-${result.pct}.png`
-    a.href = dataUrl
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
   }, [result])
 
   // ── Start screen ──
