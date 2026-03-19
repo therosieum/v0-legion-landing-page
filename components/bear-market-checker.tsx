@@ -361,13 +361,11 @@ export function BearMarketChecker() {
           <div className="relative pt-6 pb-8 px-8 flex flex-col items-center space-y-4">
             {/* Legion logo top */}
             <div className="w-full flex justify-center mb-2">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/legion-logo.svg"
                 alt="Legion"
-                width={100}
-                height={28}
-                style={{ width: "auto", height: "24px" }}
-                className="brightness-0 invert"
+                className="h-6 w-auto brightness-0 invert"
               />
             </div>
 
