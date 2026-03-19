@@ -17,8 +17,13 @@ export default function Home() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {/* Dark overlay for background */}
+      <div
+        className="absolute inset-0 bg-black/30 pointer-events-none"
+        style={{ zIndex: 0 }}
+      />
       {/* Legion Logo - Top Left */}
-      <div className="absolute top-8 left-8">
+      <div className="absolute top-8 left-8 z-10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src="/legion-logo.svg" 
@@ -30,7 +35,7 @@ export default function Home() {
         />
       </div>
 
-      <div className="w-full max-w-2xl space-y-8">
+      <div className="w-full max-w-2xl space-y-8 relative z-10">
         {/* Title */}
         <div className="text-center space-y-2">
           <h1 className="text-5xl md:text-6xl font-bold text-white">
