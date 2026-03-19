@@ -162,15 +162,25 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   canvas.height = H
   const ctx = canvas.getContext("2d")!
 
-  // Load background image
+  // Load background image and logo in parallel
   const bgImg = new window.Image()
   bgImg.crossOrigin = "anonymous"
   bgImg.src = "/result-bg.png"
 
-  await new Promise((resolve) => {
-    bgImg.onload = resolve
-    bgImg.onerror = resolve
-  })
+  const logoImg = new window.Image()
+  logoImg.crossOrigin = "anonymous"
+  logoImg.src = "/legion-logo.svg"
+
+  await Promise.all([
+    new Promise((resolve) => {
+      bgImg.onload = resolve
+      bgImg.onerror = resolve
+    }),
+    new Promise((resolve) => {
+      logoImg.onload = resolve
+      logoImg.onerror = resolve
+    }),
+  ])
 
   // Draw background
   if (bgImg.complete && bgImg.naturalWidth > 0) {
@@ -186,49 +196,62 @@ async function generateShareImage(result: QuizResult): Promise<string> {
 
   const ACCENT = "#F03C24"
   const WHITE = "#FAFAFA"
-  const GREY = "#888888"
+  const GREY = "#BBBBBB"
 
   // Title at top
-  ctx.font = "500 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "600 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
   ctx.textAlign = "center"
   ctx.fillText("Will you survive the bear market?", W / 2, 80)
 
   // Big percentage in center
-  ctx.font = `bold 180px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+  ctx.font = `900 200px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
   ctx.fillStyle = ACCENT
   ctx.textAlign = "center"
-  ctx.fillText(`${result.pct}%`, W / 2, 300)
+  ctx.textBaseline = "middle"
+  ctx.fillText(`${result.pct}%`, W / 2, 280)
 
   // Tier label
-  ctx.font = "600 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "700 48px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.fillText(TIER_LABEL[result.tier], W / 2, 360)
+  ctx.textAlign = "center"
+  ctx.textBaseline = "top"
+  ctx.fillText(TIER_LABEL[result.tier], W / 2, 380)
 
-  // Quote — wrapped
-  ctx.font = "18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  // Quote — wrapped with better spacing
+  ctx.font = "600 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
   ctx.textAlign = "center"
+  ctx.textBaseline = "top"
   const maxW = W - 200
   const words = result.quote.split(" ")
   let line = ""
-  let qy = 420
+  let qy = 460
   for (const word of words) {
     const test = line + word + " "
     if (ctx.measureText(test).width > maxW && line) {
       ctx.fillText(line.trim(), W / 2, qy)
-      qy += 30
+      qy += 32
       line = word + " "
     } else line = test
   }
   if (line.trim()) ctx.fillText(line.trim(), W / 2, qy)
 
-  // LEGION text at bottom (matching the image)
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = WHITE
-  ctx.letterSpacing = "4px"
-  ctx.textAlign = "center"
-  ctx.fillText("LEGION", W / 2, H - 40)
+  // Draw Legion logo at bottom center
+  if (logoImg.complete && logoImg.naturalWidth > 0) {
+    const logoHeight = 32
+    const logoWidth = (logoImg.naturalWidth / logoImg.naturalHeight) * logoHeight
+    // Invert colors for white logo (draw on offscreen canvas)
+    const logoCanvas = document.createElement("canvas")
+    logoCanvas.width = logoImg.naturalWidth
+    logoCanvas.height = logoImg.naturalHeight
+    const logoCtx = logoCanvas.getContext("2d")!
+    logoCtx.drawImage(logoImg, 0, 0)
+    logoCtx.globalCompositeOperation = "source-in"
+    logoCtx.fillStyle = WHITE
+    logoCtx.fillRect(0, 0, logoCanvas.width, logoCanvas.height)
+    ctx.drawImage(logoCanvas, (W - logoWidth) / 2, H - 50, logoWidth, logoHeight)
+  }
 
   return canvas.toDataURL("image/png")
 }
