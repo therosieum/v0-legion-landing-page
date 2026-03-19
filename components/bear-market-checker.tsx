@@ -186,49 +186,53 @@ async function generateShareImage(result: QuizResult): Promise<string> {
 
   const ACCENT = "#F03C24"
   const WHITE = "#FAFAFA"
-  const GREY = "#888888"
+  const GREY = "#BBBBBB"
 
   // Title at top
-  ctx.font = "500 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "600 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
   ctx.textAlign = "center"
   ctx.fillText("Will you survive the bear market?", W / 2, 80)
 
-  // Big percentage in center
-  ctx.font = `bold 180px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+  // Big percentage in center - make it bigger and bolder
+  ctx.font = `900 200px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
   ctx.fillStyle = ACCENT
   ctx.textAlign = "center"
-  ctx.fillText(`${result.pct}%`, W / 2, 300)
+  ctx.textBaseline = "middle"
+  ctx.fillText(`${result.pct}%`, W / 2, 280)
 
   // Tier label
-  ctx.font = "600 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  ctx.font = "700 48px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.fillText(TIER_LABEL[result.tier], W / 2, 360)
+  ctx.textAlign = "center"
+  ctx.textBaseline = "top"
+  ctx.fillText(TIER_LABEL[result.tier], W / 2, 380)
 
-  // Quote — wrapped
-  ctx.font = "18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  // Quote — wrapped with better spacing
+  ctx.font = "600 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = GREY
   ctx.textAlign = "center"
+  ctx.textBaseline = "top"
   const maxW = W - 200
   const words = result.quote.split(" ")
   let line = ""
-  let qy = 420
+  let qy = 460
   for (const word of words) {
     const test = line + word + " "
     if (ctx.measureText(test).width > maxW && line) {
       ctx.fillText(line.trim(), W / 2, qy)
-      qy += 30
+      qy += 32
       line = word + " "
     } else line = test
   }
   if (line.trim()) ctx.fillText(line.trim(), W / 2, qy)
 
-  // LEGION text at bottom (matching the image)
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  // LEGION text at bottom
+  ctx.font = "700 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillStyle = WHITE
-  ctx.letterSpacing = "4px"
   ctx.textAlign = "center"
-  ctx.fillText("LEGION", W / 2, H - 40)
+  ctx.textBaseline = "bottom"
+  ctx.fillText("LEGION", W / 2, H - 30)
 
   return canvas.toDataURL("image/png")
 }
