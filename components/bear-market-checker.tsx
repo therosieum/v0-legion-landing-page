@@ -10,84 +10,85 @@ const QUESTIONS = [
     id: 1,
     question: "You wake up. First thing you do?",
     options: [
-      { label: "Check price", score: 2 },
-      { label: "Open X", score: 1 },
-      { label: "I didn't sleep", score: 0 },
-      { label: "Kiss my partner and check price", score: 4 },
+      { label: "Check price", score: 4 },
+      { label: "Open X", score: 3 },
+      { label: "I didn't sleep", score: 2 },
+      { label: "Kiss my partner and check price", score: 5 },
     ],
   },
   {
     id: 2,
     question: "X now requires you to label any project post as a paid partnership. You...",
     options: [
-      { label: "Label everything — not dying on this hill", score: 4 },
-      { label: "Post anyway and pretend I didn't see the new TOS", score: 1 },
-      { label: "I stopped posting about projects, easier", score: 2 },
-      { label: "I was never getting paid anyway so nothing changed", score: 0 },
+      { label: "Label everything — not dying on this hill", score: 5 },
+      { label: "Post anyway and pretend I didn't see the new TOS", score: 3 },
+      { label: "I stopped posting about projects, easier", score: 4 },
+      { label: "I was never getting paid anyway so nothing changed", score: 2 },
     ],
   },
   {
     id: 3,
     question: "Your dev just said he's leaving crypto for AI. You...",
     options: [
-      { label: "Respect it", score: 4 },
-      { label: "Ask if he needs a cofounder", score: 1 },
-      { label: "He's going to regret this in 18 months and I will say nothing", score: 3 },
-      { label: "I'm also leaving", score: 0 },
+      { label: "Respect it", score: 5 },
+      { label: "Ask if he needs a cofounder", score: 3 },
+      { label: "He's going to regret this in 18 months and I will say nothing", score: 4 },
+      { label: "I'm also leaving", score: 1 },
     ],
   },
   {
     id: 4,
     question: "You open CT. Everyone is posting the same thing again. You...",
     options: [
-      { label: "Post it too", score: 0 },
-      { label: "Close the app and reopen it immediately", score: 1 },
-      { label: "I wrote the original", score: 4 },
-      { label: "I've accepted this is just what it is now", score: 2 },
+      { label: "Post it too", score: 2 },
+      { label: "Close the app and reopen it immediately", score: 3 },
+      { label: "I wrote the original", score: 5 },
+      { label: "I've accepted this is just what it is now", score: 4 },
     ],
   },
   {
     id: 5,
     question: "Your FYP is 90% content you don't care about. You...",
     options: [
-      { label: "Keep scrolling anyway", score: 1 },
-      { label: "I curated my following list for 3 years and it still looks like TikTok", score: 3 },
-      { label: "WE ARE COOKED", score: 0 },
-      { label: "I haven't looked up in a while", score: 4 },
+      { label: "Keep scrolling anyway", score: 3 },
+      { label: "I curated my following list for 3 years and it still looks like TikTok", score: 4 },
+      { label: "WE ARE COOKED", score: 2 },
+      { label: "I haven't looked up in a while", score: 5 },
     ],
   },
   {
     id: 6,
     question: "A founder just rugged. You go on Ethos and...",
     options: [
-      { label: "Slash immediately, max credibility burned", score: 4 },
-      { label: "I check if anyone else already slashed first", score: 2 },
-      { label: "I vouch. I don't understand my own behavior.", score: 0 },
-      { label: "I close the tab. Not my problem anymore.", score: 1 },
+      { label: "Slash immediately, max credibility burned", score: 5 },
+      { label: "I check if anyone else already slashed first", score: 4 },
+      { label: "I vouch. I don't understand my own behavior.", score: 1 },
+      { label: "I close the tab. Not my problem anymore.", score: 3 },
     ],
   },
   {
     id: 7,
     question: "A suit just got hired for a role that used to go to a degen. You feel...",
     options: [
-      { label: "It's fine, the industry is maturing", score: 4 },
-      { label: "I am the degen who didn't get the role", score: 1 },
-      { label: "I am the suit", score: 3 },
-      { label: "I've started updating my LinkedIn", score: 0 },
+      { label: "It's fine, the industry is maturing", score: 5 },
+      { label: "I am the degen who didn't get the role", score: 3 },
+      { label: "I am the suit", score: 4 },
+      { label: "I've started updating my LinkedIn", score: 2 },
     ],
   },
   {
     id: 8,
     question: "Why are you still in crypto?",
     options: [
-      { label: "I genuinely believe in it", score: 4 },
-      { label: "I've already told too many people I'm in crypto", score: 0 },
-      { label: "We are still early", score: 3 },
-      { label: "I love all my CT friends", score: 2 },
+      { label: "I genuinely believe in it", score: 5 },
+      { label: "I've already told too many people I'm in crypto", score: 2 },
+      { label: "We are still early", score: 4 },
+      { label: "I love all my CT friends", score: 3 },
     ],
   },
 ]
 
+// Max is 40, min realistic is ~16 (all lowest), so range is 40-75% to 100%
 const MAX_SCORE = QUESTIONS.reduce((acc, q) => acc + Math.max(...q.options.map((o) => o.score)), 0)
 
 // ─── Result copy ───────────────────────────────────────────────────────────────
@@ -95,19 +96,50 @@ const MAX_SCORE = QUESTIONS.reduce((acc, q) => acc + Math.max(...q.options.map((
 type Tier = "survivor" | "likely" | "edge" | "risk" | "cooked"
 
 function getTier(pct: number): Tier {
-  if (pct >= 85) return "survivor"
-  if (pct >= 65) return "likely"
-  if (pct >= 45) return "edge"
-  if (pct >= 25) return "risk"
+  if (pct >= 90) return "survivor"
+  if (pct >= 75) return "likely"
+  if (pct >= 55) return "edge"
+  if (pct >= 40) return "risk"
   return "cooked"
 }
 
-const TIER_LABEL: Record<Tier, string> = {
-  survivor: "You're built for this",
-  likely: "Lowkey gonna make it",
-  edge: "Too close to call",
-  risk: "Not looking great",
-  cooked: "Absolutely cooked",
+const TIER_LABELS: Record<Tier, string[]> = {
+  survivor: [
+    "You're built for this",
+    "Diamond hands verified",
+    "Bear market? What bear market?",
+    "Unshakeable",
+    "Built different",
+  ],
+  likely: [
+    "Lowkey gonna make it",
+    "You'll be fine",
+    "Survival odds: high",
+    "Pretty solid tbh",
+    "Main character energy",
+  ],
+  edge: [
+    "It's a coin flip",
+    "Could go either way",
+    "The vibes are uncertain",
+    "Borderline survivor",
+    "Touch and go",
+    "Living on the edge",
+  ],
+  risk: [
+    "Not looking great",
+    "Slightly cooked",
+    "Concerning, but salvageable",
+    "You need to lock in",
+    "Warning signs detected",
+  ],
+  cooked: [
+    "Absolutely cooked",
+    "Down catastrophic",
+    "RIP your portfolio",
+    "Beyond saving",
+    "Certified exit liquidity",
+  ],
 }
 
 const TIER_QUOTES: Record<Tier, string[]> = {
@@ -148,6 +180,7 @@ const TIER_QUOTES: Record<Tier, string[]> = {
 interface QuizResult {
   pct: number
   tier: Tier
+  tierLabel: string
   quote: string
   answers: number[]
 }
@@ -216,7 +249,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   ctx.fillStyle = WHITE
   ctx.textAlign = "center"
   ctx.textBaseline = "top"
-  ctx.fillText(TIER_LABEL[result.tier], W / 2, 380)
+  ctx.fillText(result.tierLabel, W / 2, 380)
 
   // Quote — wrapped with better spacing
   ctx.font = "600 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
@@ -308,12 +341,17 @@ export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: b
         const totalScore = currentAnswers.reduce((acc, answerIdx, qIdx) => {
           return acc + QUESTIONS[qIdx].options[answerIdx].score
         }, 0)
-        const pct = Math.round((totalScore / MAX_SCORE) * 100)
+        // Add small random variance (-3 to +7) for diversity, skewed positive
+        const variance = Math.floor(Math.random() * 11) - 3
+        const rawPct = Math.round((totalScore / MAX_SCORE) * 100) + variance
+        const pct = Math.max(15, Math.min(99, rawPct))
         const tier = getTier(pct)
+        const tierLabels = TIER_LABELS[tier]
+        const tierLabel = tierLabels[Math.floor(Math.random() * tierLabels.length)]
         const quotes = TIER_QUOTES[tier]
         const fingerprint = currentAnswers.reduce((a, b) => a + b, 0)
         const quote = quotes[fingerprint % quotes.length]
-        setResult({ pct, tier, quote, answers: currentAnswers })
+        setResult({ pct, tier, tierLabel, quote, answers: currentAnswers })
         setStep("result")
         setIsTransitioning(false)
         setTimeout(() => {
@@ -423,7 +461,7 @@ export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: b
 
             {/* Tier label */}
             <p className="text-white text-2xl font-semibold animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-              {TIER_LABEL[result.tier]}
+              {result.tierLabel}
             </p>
 
             {/* Progress bar */}
