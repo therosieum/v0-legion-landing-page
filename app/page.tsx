@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { BearMarketChecker } from '@/components/bear-market-checker'
 
 export default function Home() {
+  const [quizStarted, setQuizStarted] = useState(false)
+
   return (
     <main 
       className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative"
@@ -22,6 +25,7 @@ export default function Home() {
           alt="Legion" 
           width={120}
           height={32}
+          style={{ width: 'auto', height: '32px' }}
           className="brightness-0 invert"
         />
       </div>
@@ -38,12 +42,14 @@ export default function Home() {
         </div>
 
         {/* Checker */}
-        <BearMarketChecker />
+        <BearMarketChecker onStepChange={setQuizStarted} />
 
-        {/* Pre-quiz disclaimer */}
-        <p className="text-white/50 text-xs text-center leading-relaxed max-w-md mx-auto">
-          Just a Heads Up: This quiz is purely for fun and the "vibes." While Legion takes on-chain reputation seriously, this specific quiz is for entertainment purposes only. It is not investment advice, nor is it a formal assessment of your financial standing or "Legion Score." Play at your own risk, laugh at the memes, and remember: none of this is financial advice.
-        </p>
+        {/* Pre-quiz disclaimer - only show before quiz starts */}
+        {!quizStarted && (
+          <p className="text-white/50 text-xs text-center leading-relaxed max-w-md mx-auto">
+            Just a Heads Up: This quiz is purely for fun and the "vibes." While Legion takes on-chain reputation seriously, this specific quiz is for entertainment purposes only. It is not investment advice, nor is it a formal assessment of your financial standing or "Legion Score." Play at your own risk, laugh at the memes, and remember: none of this is financial advice.
+          </p>
+        )}
       </div>
 
       {/* Footer Disclaimer */}

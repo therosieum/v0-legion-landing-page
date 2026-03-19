@@ -235,7 +235,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export function BearMarketChecker() {
+export function BearMarketChecker({ onStepChange }: { onStepChange?: (started: boolean) => void }) {
   const [step, setStep] = useState<"start" | "quiz" | "result">("start")
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
@@ -330,10 +330,13 @@ export function BearMarketChecker() {
   // ── Start screen ──
   if (step === "start") {
     return (
-      <div className="w-full animate-in fade-in duration-500">
+      <div className="w-full">
         <button
-          onClick={() => setStep("quiz")}
-          className="w-full px-6 py-4 bg-white text-black rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={() => {
+            setStep("quiz")
+            onStepChange?.(true)
+          }}
+          className="w-full px-6 py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors"
         >
           Take the quiz
         </button>
