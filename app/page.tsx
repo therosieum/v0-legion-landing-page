@@ -44,7 +44,7 @@ export default function Home() {
         {/* Checker */}
         <BearMarketChecker onStepChange={setQuizStarted} />
 
-        {/* Pre-quiz disclaimer - only show before quiz starts */}
+        {/* Pre-quiz disclaimer - only on landing */}
         {!quizStarted && (
           <p className="text-white/50 text-xs text-center leading-relaxed max-w-md mx-auto">
             Just a Heads Up: This quiz is purely for fun and the "vibes." While Legion takes on-chain reputation seriously, this specific quiz is for entertainment purposes only. It is not investment advice, nor is it a formal assessment of your financial standing or "Legion Score." Play at your own risk, laugh at the memes, and remember: none of this is financial advice.
@@ -52,12 +52,14 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer Disclaimer */}
-      <footer className="absolute bottom-0 left-0 right-0 px-6 py-4">
-        <p className="text-white/20 text-[9px] text-center leading-relaxed max-w-4xl mx-auto">
-          Disclaimer: The Bear Market Quiz is provided by Legion for entertainment and informational purposes only. It does not constitute financial, investment, legal, or tax advice. The quiz results and "scores" are generated based on subjective criteria and should not be used as a basis for any investment decisions. Cryptocurrency investments carry significant risk; always conduct your own research or consult a certified financial advisor before trading. Legion is not responsible for any losses or actions taken based on the content of this quiz.
-        </p>
-      </footer>
+      {/* Footer Disclaimer - only shows once quiz has started */}
+      {quizStarted && (
+        <footer className="absolute bottom-0 left-0 right-0 px-6 py-4">
+          <p className="text-white/20 text-[9px] text-center leading-relaxed max-w-4xl mx-auto">
+            Disclaimer: The Bear Market Quiz is provided by Legion for entertainment and informational purposes only. It does not constitute financial, investment, legal, or tax advice. The quiz results and "scores" are generated based on subjective criteria and should not be used as a basis for any investment decisions. Cryptocurrency investments carry significant risk; always conduct your own research or consult a certified financial advisor before trading. Legion is not responsible for any losses or actions taken based on the content of this quiz.
+          </p>
+        </footer>
+      )}
     </main>
   )
 }
