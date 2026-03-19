@@ -60,10 +60,10 @@ export async function GET() {
           {/* Subtitle */}
           <p
             style={{
-              fontSize: '32px',
+              fontSize: '48px',
               color: '#ffffff',
               margin: '24px 0 0 0',
-              fontWeight: '500',
+              fontWeight: '600',
               textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
             }}
           >

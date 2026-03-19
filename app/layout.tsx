@@ -10,6 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://legion.cc'),
   title: 'Will You Survive The Bear Market? | Legion',
   description: 'Find out if you have what it takes to survive the bear market. 8 questions to find out.',
   openGraph: {
