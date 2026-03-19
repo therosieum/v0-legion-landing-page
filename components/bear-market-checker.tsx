@@ -10,17 +10,17 @@ const QUESTIONS = [
     id: 1,
     question: "You wake up. First thing you do?",
     options: [
-      { label: "Check price", score: 1 },
-      { label: "Open X", score: 2 },
+      { label: "Check price", score: 2 },
+      { label: "Open X", score: 1 },
       { label: "I didn't sleep", score: 0 },
-      { label: "Kiss my partner and check price", score: 3 },
+      { label: "Kiss my partner and check price", score: 4 },
     ],
   },
   {
     id: 2,
     question: "X now requires you to label any project post as a paid partnership. You...",
     options: [
-      { label: "Label everything — not dying on this hill", score: 3 },
+      { label: "Label everything — not dying on this hill", score: 4 },
       { label: "Post anyway and pretend I didn't see the new TOS", score: 1 },
       { label: "I stopped posting about projects, easier", score: 2 },
       { label: "I was never getting paid anyway so nothing changed", score: 0 },
@@ -30,9 +30,9 @@ const QUESTIONS = [
     id: 3,
     question: "Your dev just said he's leaving crypto for AI. You...",
     options: [
-      { label: "Respect it", score: 3 },
-      { label: "Ask if he needs a cofounder", score: 2 },
-      { label: "He's going to regret this in 18 months and I will say nothing", score: 2 },
+      { label: "Respect it", score: 4 },
+      { label: "Ask if he needs a cofounder", score: 1 },
+      { label: "He's going to regret this in 18 months and I will say nothing", score: 3 },
       { label: "I'm also leaving", score: 0 },
     ],
   },
@@ -42,7 +42,7 @@ const QUESTIONS = [
     options: [
       { label: "Post it too", score: 0 },
       { label: "Close the app and reopen it immediately", score: 1 },
-      { label: "I wrote the original", score: 3 },
+      { label: "I wrote the original", score: 4 },
       { label: "I've accepted this is just what it is now", score: 2 },
     ],
   },
@@ -51,28 +51,28 @@ const QUESTIONS = [
     question: "Your FYP is 90% content you don't care about. You...",
     options: [
       { label: "Keep scrolling anyway", score: 1 },
-      { label: "I curated my following list for 3 years and it still looks like TikTok", score: 2 },
+      { label: "I curated my following list for 3 years and it still looks like TikTok", score: 3 },
       { label: "WE ARE COOKED", score: 0 },
-      { label: "I haven't looked up in a while", score: 1 },
+      { label: "I haven't looked up in a while", score: 4 },
     ],
   },
   {
     id: 6,
     question: "A founder just rugged. You go on Ethos and...",
     options: [
-      { label: "Slash immediately, max credibility burned", score: 3 },
-      { label: "I check if anyone else already slashed first", score: 1 },
+      { label: "Slash immediately, max credibility burned", score: 4 },
+      { label: "I check if anyone else already slashed first", score: 2 },
       { label: "I vouch. I don't understand my own behavior.", score: 0 },
-      { label: "I close the tab. Not my problem anymore.", score: 2 },
+      { label: "I close the tab. Not my problem anymore.", score: 1 },
     ],
   },
   {
     id: 7,
     question: "A suit just got hired for a role that used to go to a degen. You feel...",
     options: [
-      { label: "It's fine, the industry is maturing", score: 3 },
+      { label: "It's fine, the industry is maturing", score: 4 },
       { label: "I am the degen who didn't get the role", score: 1 },
-      { label: "I am the suit", score: 2 },
+      { label: "I am the suit", score: 3 },
       { label: "I've started updating my LinkedIn", score: 0 },
     ],
   },
@@ -80,9 +80,9 @@ const QUESTIONS = [
     id: 8,
     question: "Why are you still in crypto?",
     options: [
-      { label: "I genuinely believe in it", score: 3 },
-      { label: "I've already told too many people I'm in crypto", score: 1 },
-      { label: "We are still early", score: 2 },
+      { label: "I genuinely believe in it", score: 4 },
+      { label: "I've already told too many people I'm in crypto", score: 0 },
+      { label: "We are still early", score: 3 },
       { label: "I love all my CT friends", score: 2 },
     ],
   },
@@ -95,10 +95,10 @@ const MAX_SCORE = QUESTIONS.reduce((acc, q) => acc + Math.max(...q.options.map((
 type Tier = "survivor" | "likely" | "edge" | "risk" | "cooked"
 
 function getTier(pct: number): Tier {
-  if (pct >= 82) return "survivor"
-  if (pct >= 62) return "likely"
-  if (pct >= 42) return "edge"
-  if (pct >= 22) return "risk"
+  if (pct >= 85) return "survivor"
+  if (pct >= 65) return "likely"
+  if (pct >= 45) return "edge"
+  if (pct >= 25) return "risk"
   return "cooked"
 }
 
