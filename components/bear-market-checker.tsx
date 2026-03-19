@@ -162,15 +162,25 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   canvas.height = H
   const ctx = canvas.getContext("2d")!
 
-  // Load background image
+  // Load background image and logo in parallel
   const bgImg = new window.Image()
   bgImg.crossOrigin = "anonymous"
   bgImg.src = "/result-bg.png"
 
-  await new Promise((resolve) => {
-    bgImg.onload = resolve
-    bgImg.onerror = resolve
-  })
+  const logoImg = new window.Image()
+  logoImg.crossOrigin = "anonymous"
+  logoImg.src = "/legion-logo.svg"
+
+  await Promise.all([
+    new Promise((resolve) => {
+      bgImg.onload = resolve
+      bgImg.onerror = resolve
+    }),
+    new Promise((resolve) => {
+      logoImg.onload = resolve
+      logoImg.onerror = resolve
+    }),
+  ])
 
   // Draw background
   if (bgImg.complete && bgImg.naturalWidth > 0) {
@@ -194,7 +204,7 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   ctx.textAlign = "center"
   ctx.fillText("Will you survive the bear market?", W / 2, 80)
 
-  // Big percentage in center - make it bigger and bolder
+  // Big percentage in center
   ctx.font = `900 200px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
   ctx.fillStyle = ACCENT
   ctx.textAlign = "center"
@@ -227,12 +237,21 @@ async function generateShareImage(result: QuizResult): Promise<string> {
   }
   if (line.trim()) ctx.fillText(line.trim(), W / 2, qy)
 
-  // LEGION text at bottom
-  ctx.font = "700 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillStyle = WHITE
-  ctx.textAlign = "center"
-  ctx.textBaseline = "bottom"
-  ctx.fillText("LEGION", W / 2, H - 30)
+  // Draw Legion logo at bottom center
+  if (logoImg.complete && logoImg.naturalWidth > 0) {
+    const logoHeight = 32
+    const logoWidth = (logoImg.naturalWidth / logoImg.naturalHeight) * logoHeight
+    // Invert colors for white logo (draw on offscreen canvas)
+    const logoCanvas = document.createElement("canvas")
+    logoCanvas.width = logoImg.naturalWidth
+    logoCanvas.height = logoImg.naturalHeight
+    const logoCtx = logoCanvas.getContext("2d")!
+    logoCtx.drawImage(logoImg, 0, 0)
+    logoCtx.globalCompositeOperation = "source-in"
+    logoCtx.fillStyle = WHITE
+    logoCtx.fillRect(0, 0, logoCanvas.width, logoCanvas.height)
+    ctx.drawImage(logoCanvas, (W - logoWidth) / 2, H - 50, logoWidth, logoHeight)
+  }
 
   return canvas.toDataURL("image/png")
 }
