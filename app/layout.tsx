@@ -11,16 +11,26 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Will You Survive The Bear Market? | Legion',
-  description: 'Find out if you have what it takes to survive the bear market. Enter your X username and discover your fate.',
+  description: 'Find out if you have what it takes to survive the bear market. 8 questions to find out.',
   openGraph: {
     title: 'Will You Survive The Bear Market? | Legion',
     description: 'Find out if you have what it takes to survive the bear market.',
     type: 'website',
+    url: 'https://legion.cc',
+    images: [
+      {
+        url: '/og',
+        width: 1200,
+        height: 630,
+        alt: 'Will you survive the bear market?',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Will You Survive The Bear Market? | Legion',
     description: 'Find out if you have what it takes to survive the bear market.',
+    images: ['/og'],
   },
 }
 
