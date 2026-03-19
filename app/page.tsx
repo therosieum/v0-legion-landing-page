@@ -36,7 +36,7 @@ export default function Home() {
           <h1 className="text-5xl md:text-6xl font-bold text-white">
             Will you survive the bear market?
           </h1>
-          <p className="text-white text-base font-medium drop-shadow-lg">
+          <p className="text-white text-lg md:text-xl font-medium drop-shadow-lg">
             8 questions to find out
           </p>
         </div>
