@@ -13,21 +13,20 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #d32f2f 0%, #f57c00 50%, #d32f2f 100%)',
+          background: 'linear-gradient(135deg, #C41E3A 0%, #DC143C 25%, #FF4500 50%, #DC143C 75%, #C41E3A 100%)',
           fontFamily: '"Inter", sans-serif',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Warrior silhouettes background overlay */}
+        {/* Dark overlay for text readability */}
         <div
           style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            background: 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 630%22%3E%3Cdefs%3E%3Cpattern id=%22warriors%22 x=%220%22 y=%220%22 width=%22200%22 height=%22630%22 patternUnits=%22userSpaceOnUse%22%3E%3Ccircle cx=%22100%22 cy=%22150%22 r=%2240%22 fill=%22%23000000%22 opacity=%220.3%22/%3E%3Crect x=%2290%22 y=%22200%22 width=%2220%22 height=%22100%22 fill=%22%23000000%22 opacity=%220.3%22/%3E%3Crect x=%2280%22 y=%22310%22 width=%2240%22 height=%2220%22 fill=%22%23000000%22 opacity=%220.3%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%221200%22 height=%22630%22 fill=%22url(%23warriors)%22/%3E%3C/svg%3E")',
-            backgroundSize: '200px 630px',
-            opacity: 0.2,
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%)',
+            zIndex: 1,
           }}
         />
 
@@ -41,17 +40,20 @@ export async function GET() {
             zIndex: 10,
             textAlign: 'center',
             position: 'relative',
+            paddingLeft: '60px',
+            paddingRight: '60px',
           }}
         >
           {/* Main heading */}
           <h1
             style={{
-              fontSize: '72px',
+              fontSize: '80px',
               fontWeight: '900',
               color: '#ffffff',
-              margin: '0 40px',
-              lineHeight: '1.1',
-              textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+              margin: '0',
+              lineHeight: '1.0',
+              textShadow: '0 6px 30px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6)',
+              letterSpacing: '-2px',
             }}
           >
             Will you survive the bear market?
@@ -60,11 +62,11 @@ export async function GET() {
           {/* Subtitle */}
           <p
             style={{
-              fontSize: '48px',
+              fontSize: '56px',
               color: '#ffffff',
-              margin: '24px 0 0 0',
-              fontWeight: '600',
-              textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+              margin: '32px 0 0 0',
+              fontWeight: '700',
+              textShadow: '0 4px 20px rgba(0, 0, 0, 0.8)',
             }}
           >
             8 questions to find out
@@ -73,21 +75,24 @@ export async function GET() {
           {/* Button shape */}
           <div
             style={{
-              marginTop: '40px',
-              paddingX: '40px',
-              paddingY: '16px',
+              marginTop: '50px',
+              paddingLeft: '50px',
+              paddingRight: '50px',
+              paddingTop: '20px',
+              paddingBottom: '20px',
               backgroundColor: '#ffffff',
               borderRadius: '9999px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
             }}
           >
             <span
               style={{
-                fontSize: '24px',
-                fontWeight: '700',
-                color: '#000000',
+                fontSize: '28px',
+                fontWeight: '800',
+                color: '#1a1a1a',
               }}
             >
               Take the quiz
@@ -95,19 +100,22 @@ export async function GET() {
           </div>
         </div>
 
-        {/* Legion branding bottom right */}
+        {/* Legion branding bottom center */}
         <div
           style={{
             position: 'absolute',
-            bottom: '20px',
-            right: '40px',
-            fontSize: '14px',
+            bottom: '30px',
+            left: '0',
+            right: '0',
+            textAlign: 'center',
+            fontSize: '18px',
             color: '#ffffff',
-            fontWeight: '600',
-            textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+            fontWeight: '700',
+            textShadow: '0 4px 15px rgba(0, 0, 0, 0.6)',
+            letterSpacing: '4px',
           }}
         >
-          legion.cc
+          LEGION
         </div>
       </div>
     ),
